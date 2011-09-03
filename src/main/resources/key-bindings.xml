@@ -1,0 +1,31 @@
+<?xml version="1.1"?>
+<!--
+Sample keybinding xml file.
+
+Acceptable values for "platform" are "win", "mac", "linux".
+Acceptable names for modifiers are "control", "alt", and "command", "platform".
+"platform" means Command on Mac and Control on other platforms.
+-->
+<bindings>
+  <action name="foo1">
+    <binding>
+      <mask name="shift" />
+      <key name="F" />
+    </binding>
+  </action>
+  <action name="foo2">
+    <binding>
+      <key name="space" />
+    </binding>
+  </action>
+  <action name="foo3">
+    <binding>
+      <mask name="control" />
+      <key name="L" />
+    </binding>
+    <binding>
+      <mask name="control" />
+      <key name="X" />
+    </binding>
+  </action>
+</bindings>
