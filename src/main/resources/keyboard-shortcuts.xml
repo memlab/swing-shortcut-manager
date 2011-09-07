@@ -2,8 +2,7 @@
 <!--
 Sample keybinding xml file.
 
-Acceptable values for "platform" are "win", "mac", "linux".
-Acceptable names for modifiers are "control", "alt", and "command", "platform".
+Acceptable names for masks are "alt", "command", "control", "platform", "winkey".
 "platform" means Command on Mac and Control on other platforms.
 -->
 <bindings>

@@ -9,6 +9,7 @@ import org.jdom.input._
 
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
+import scala.util.Properties
 
 class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
 
@@ -94,16 +95,99 @@ class ShortcutsFile(inputStream: InputStream) {
 class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
 
   this setLayout new BoxLayout(this, BoxLayout.X_AXIS)
-  this setBorder BorderFactory.createLineBorder(Color.BLACK, 3)
-  this add new JLabel(actionName)
-  this add new JTextField
+  this setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+  this add new ActionLabel
+  this add Box.createHorizontalGlue
+  this add new KeyField
+  this setMaximumSize new Dimension(Integer.MAX_VALUE,
+                                    this.getPreferredSize.getHeight.toInt)
+
+  class ActionLabel() extends JLabel(actionName) {
+
+    this setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+  }
+
+  class KeyField() extends JTextField {
+
+    this setText short.toString
+    this setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+    this setMaximumSize new Dimension(this.getPreferredSize.getWidth.toInt,
+                                      this.getPreferredSize.getWidth.toInt)
+  }
 }
 
+
 case class BoundAction(actionName: String, shortcuts: List[Shortcut])
-case class Shortcut(masks: List[Mask], keys: List[Key])
-sealed trait KeyElement
-case class Mask(name: String) extends KeyElement
-case class Key(name: String) extends KeyElement
+
+case class Shortcut(masks: List[Mask], keys: List[Key]) {
+  import Shortcut.keyListRepr
+  override val toString = keyListRepr(masks) + " " + keyListRepr(keys)
+}
+
+object Shortcut {
+
+  def keyListRepr(lst: List[KeyElement]) = {
+    val sorted = lst sortWith { (f, s) => f.order < s.order }
+    val reprs = sorted map { _.keyRepr }
+    reprs.mkString
+  }
+}
+
+sealed trait KeyElement {
+  def keyRepr: String
+  def order: Int
+}
+
+sealed trait Mask extends KeyElement {
+  def xmlName: String
+}
+
+object Mask {
+
+  def apply(name: String) = name match {
+    case AltKey.xmlName     => AltKey
+    case CommandKey.xmlName => CommandKey
+    case ControlKey.xmlName => ControlKey
+    case ShiftKey.xmlName   => ShiftKey
+    case WinKey.xmlName     => WinKey
+    case _                  => sys.error("unkown mask key: " + name)
+  }
+}
+
+case object AltKey extends Mask {
+  override val keyRepr = if (Properties.isMac) "⌥" else "Alt"
+  override val xmlName = "alt"
+  override val order = -3
+}
+
+case object CommandKey extends Mask {
+  override val keyRepr = "⌘"
+  override val xmlName = "command"
+  override val order = -1
+}
+
+case object ControlKey extends Mask {
+  override val keyRepr = if (Properties.isMac) "^" else "Ctrl"
+  override val xmlName = "control"
+  override val order = -4
+}
+
+case object ShiftKey extends Mask {
+  override val keyRepr = if (Properties.isMac) "⇧" else "Shift"
+  override val xmlName = "shift"
+  override val order = -2
+}
+
+case object WinKey extends Mask {
+  override val keyRepr = if (Properties.osName == "Linux") "Mod4" else "Win"
+  override val xmlName = "winkey"
+  override val order = -5
+}
+
+case class Key(name: String) extends KeyElement {
+  override val keyRepr = name
+  override val order = 0
+}
 
 
 object Main {
