@@ -1,19 +1,21 @@
 package edu.upenn.psych.memory.keyboardmanager
 
-import java.awt.{ List => _, _ }
-import java.awt.event._
-import java.io.{ Console => _, _ }
-import javax.swing._
-import javax.swing.table._
-import javax.swing.event._
-import org.jdom._
-import org.jdom.input._
+import java.awt.{ Color, Dimension }
+import java.awt.event.{ ActionEvent, KeyEvent, WindowAdapter, WindowEvent }
+
+import javax.swing.{ Box, BoxLayout }
+import javax.swing.{ AbstractAction, BorderFactory, KeyStroke,
+                     ListSelectionModel, WindowConstants }
+import javax.swing.{ JComponent, JFrame, JLabel, JPanel, JTable, JScrollPane,
+                     JTextField }
+import javax.swing.table.TableModel
+import javax.swing.event.TableModelListener
 
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 import scala.util.Properties
 
-class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
+class KeyboardShortcutManager(shortsFile: XActionsFile) extends JFrame {
 
   this setSize (500, 500)
   this setDefaultCloseOperation WindowConstants.DO_NOTHING_ON_CLOSE
@@ -42,11 +44,11 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
   object EscapeWindowListener extends WindowAdapter {
 
     override def windowClosing(e: WindowEvent) =
-      KeyboardShortcutManager.this.setVisible(false)
+      KeyboardShortcutManager.this setVisible false
   }
 }
 
-class ShortcutsTable(shortsFile: ShortcutsFile) extends JTable {
+class ShortcutsTable(shortsFile: XActionsFile) extends JTable {
 
   this setModel ShortcutsTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
@@ -60,12 +62,12 @@ class ShortcutsTable(shortsFile: ShortcutsFile) extends JTable {
     val headers = List("Action", "Shortcut", "Default")
     val contents = new m.ListBuffer[m.ListBuffer[JLabel]]()
     for { action <- shortsFile.boundActions
-          short <- action.shortcuts } {
-      val buf = new m.ListBuffer[JLabel]()
-      buf ++= List(new JLabel(action.actionName),
-                  new JLabel(short.toString),
-                  new JLabel(short.toString))
-      contents append buf
+          short <- action.shortcut } {
+      // val buf = new m.ListBuffer[JLabel]()
+      // buf ++= List(new JLabel(action.actionName),
+      //             new JLabel(short.toString),
+      //             new JLabel(short.toString))
+      // contents append buf
     }
 
     override def getRowCount = contents.length
@@ -81,49 +83,6 @@ class ShortcutsTable(shortsFile: ShortcutsFile) extends JTable {
         contents(rx)(cx) = new JLabel(value.toString)
     override def addTableModelListener(l: TableModelListener) = ()
     override def removeTableModelListener(l: TableModelListener) = ()
-  }
-}
-
-class ShortcutsFile(inputStream: InputStream) {
-
-  val NameAttr = "name"
-  val MaskAttr = "mask"
-  val KeyAttr  = "key"
-
-  val boundActions: List[BoundAction] = parseStream()
-
-  private def parseStream(): List[BoundAction] = {
-    val builder = new SAXBuilder
-    val doc = builder build inputStream
-    val bindingsEl = doc.getRootElement
-    val actionEls: List[Any] = bindingsEl.getChildren.asScala.toList
-    val boundActionsBuf = new m.ListBuffer[BoundAction]()
-    for (rawActionEl <- actionEls) {
-      val actionEl = rawActionEl.asInstanceOf[Element]
-      val actionName = actionEl getAttributeValue NameAttr
-      val shortsBuf = new m.ListBuffer[Shortcut]
-      val bindingChildren = actionEl.getChildren.asScala
-      if (bindingChildren.nonEmpty) {
-        for (rawBindingEl <- bindingChildren) {
-          val bindingEl = rawBindingEl.asInstanceOf[Element]
-          val maskBuf = new m.ListBuffer[Mask]()
-          val keyBuf = new m.ListBuffer[Key]()
-          for (rawMaskOrKeyEl <- bindingEl.getChildren.asScala) {
-            val maskOrKeyEl = rawMaskOrKeyEl.asInstanceOf[Element]
-            val attrName = maskOrKeyEl getAttributeValue NameAttr
-            maskOrKeyEl.getName match {
-              case KeyAttr  => keyBuf  append Key(attrName)
-              case MaskAttr => maskBuf append Mask(attrName)
-            }
-          }
-          val short = Shortcut(maskBuf.toList, keyBuf.toList)
-          shortsBuf append short
-        }
-      }
-      else shortsBuf append Shortcut(Nil, Nil)
-      boundActionsBuf append BoundAction(actionName, shortsBuf.toList)
-    }
-    boundActionsBuf.toList
   }
 }
 
@@ -152,36 +111,40 @@ class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
 }
 
 
-case class BoundAction(actionName: String, shortcuts: List[Shortcut])
+case class XAction(val className: String,
+                   actionName: Option[String],
+                   tooltip: Option[String],
+                   shortcut: Option[Shortcut])
 
-case class Shortcut(masks: List[Mask], keys: List[Key]) {
+case class Shortcut(masks: List[Mask], keys: List[NonMask]) {
 
-  import Shortcut._
+  val sep = if (Properties.isMac) "" else "+"
 
   override val toString = {
+
+    def keyListRepr(lst: List[AbstractKey]) = {
+      val sorted = lst sortWith { (f, s) => f.order < s.order }
+      val reprs = sorted map { _.keyRepr }
+      reprs mkString sep
+    }
+
     val masksStr = keyListRepr(masks)
     val keysStr = keyListRepr(keys)
     masksStr + { if(masksStr.length == 0) "" else sep } + keysStr
   }
 }
 
-object Shortcut {
-
-  val sep = if (Properties.isMac) "" else "+"
-
-  def keyListRepr(lst: List[KeyElement]) = {
-    val sorted = lst sortWith { (f, s) => f.order < s.order }
-    val reprs = sorted map { _.keyRepr }
-    reprs mkString sep
-  }
-}
-
-sealed trait KeyElement {
+sealed trait AbstractKey {
   def keyRepr: String
   def order: Int
 }
 
-sealed trait Mask extends KeyElement {
+case class NonMask(name: String) extends AbstractKey {
+  override val keyRepr = name
+  override val order = 0
+}
+
+sealed trait Mask extends AbstractKey {
   def xmlName: String
 }
 
@@ -228,11 +191,6 @@ case object WinKey extends Mask {
   override val order = -5
 }
 
-case class Key(name: String) extends KeyElement {
-  override val keyRepr = name
-  override val order = 0
-}
-
 
 object Main {
 
@@ -240,7 +198,7 @@ object Main {
     val resourcePath = "/actions.xml"
     Option(Main.getClass.getResourceAsStream(resourcePath)) match {
       case Some(stream) => {
-        val shortsFile = new ShortcutsFile(stream)
+        val shortsFile = new XActionsFile(stream)
         val mgr = new KeyboardShortcutManager(shortsFile)
         mgr setVisible true
       }
