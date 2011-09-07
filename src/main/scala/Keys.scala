@@ -13,6 +13,7 @@ case class NonMaskKey(name: String) extends AbstractKey {
 }
 
 sealed trait MaskKey extends AbstractKey {
+  //escape ⎋
   def xmlName: String
 }
 
