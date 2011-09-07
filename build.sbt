@@ -16,7 +16,13 @@ javacOptions ++= Seq("-Xlint:unchecked")
 mainClass in (Compile, packageBin) :=
   Some("edu.upenn.psych.memory.keyboardmanager.Main")
 
-mainClass in (Compile, run) := Some("edu.upenn.psych.memory.keyboardmanager.Main")
+mainClass in (Compile, run) :=
+  Some("edu.upenn.psych.memory.keyboardmanager.Main")
+
+//JAVA DEPENDENCIES
+libraryDependencies ++= Seq (
+  "jdom" % "jdom" % "1.1"
+)
 
 //SBT BEHAVIOR
 fork in Compile := true
