@@ -24,7 +24,7 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
     this setViewportView new ShortcutsPanel(shortsFile)
     getHorizontalScrollBar setUnitIncrement 15
     getVerticalScrollBar setUnitIncrement 15
-    
+
     val Exit = "exit"
     val EscStroke = KeyStroke getKeyStroke (KeyEvent.VK_ESCAPE, 0, false)
     getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(EscStroke, Exit)
