@@ -23,9 +23,9 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile)  extends JFrame {
 
 class ShortcutsPanel(shortsFile: ShortcutsFile) extends JPanel {
   this setLayout new BoxLayout(this, BoxLayout.Y_AXIS)
-  val shortDisps = shortsFile.shorts map { new ShortcutDisplay(_) }
-  for (disp <- shortDisps) {
-    this add disp
+  for { action <- shortsFile.boundActions
+        short <- action.shortcuts } {
+    this add new ShortcutDisplay(action.actionName, short)
   }
 }
 
@@ -34,23 +34,23 @@ class ShortcutsFile(inputStream: InputStream) {
   val doc = builder build inputStream
   val bindingsEl = doc.getRootElement
   val actionEls: List[Any] = bindingsEl.getChildren.asScala.toList
-  val shortsBuf = new m.ListBuffer[Shortcut]()
+  val boundActionsBuf = new m.ListBuffer[BindableAction]()
   for (rawActionEl <- actionEls) {
     val actionEl = rawActionEl.asInstanceOf[Element]
     val actionName = actionEl getAttributeValue "name"
-    val short = Shortcut(actionName, Nil, Nil)
-    shortsBuf append short
+    val short = BindableAction(actionName, List(Shortcut(Nil, Nil)))
+    boundActionsBuf append short
   }
-  val shorts = shortsBuf.toList
+  val boundActions = boundActionsBuf.toList
 }
 
-case class Shortcut(actionName: String, masks: List[String],
-                    keys: List[String])
+case class BindableAction(actionName: String, shortcuts: List[Shortcut])
+case class Shortcut(masks: List[String], keys: List[String])
 
-class ShortcutDisplay(short: Shortcut) extends JPanel {
+class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
   this setLayout new BoxLayout(this, BoxLayout.X_AXIS)
   this setBorder BorderFactory.createLineBorder(Color.BLACK, 3)
-  this add new JLabel(short.actionName)
+  this add new JLabel(actionName)
   this add new JTextField
 }
 
