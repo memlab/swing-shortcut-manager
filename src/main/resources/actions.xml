@@ -3,7 +3,7 @@
 Sample Actions xml file.
 
 Acceptable names for masks are "alt", "command", "control", "menu", "winkey".
-"platform" means Command on Mac and Control on other platforms.
+"menu" means Command on Mac and Control on other platforms.
 -->
 <actions>
 
