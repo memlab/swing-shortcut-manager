@@ -9,7 +9,7 @@ import org.jdom.Element
 import org.jdom.input.SAXBuilder
 import org.jdom.xpath.XPath
 
-class XActionsFile(inputStream: InputStream) {
+class XActionsParser(inputStream: InputStream) {
 
   val xactions: List[XAction] = parseStream()
 

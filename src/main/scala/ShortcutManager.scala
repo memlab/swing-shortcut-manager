@@ -15,7 +15,7 @@ import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 import scala.util.Properties
 
-class KeyboardShortcutManager(xactions: List[XAction]) extends JFrame {
+class ShortcutManager(xactions: List[XAction]) extends JFrame {
 
   this setSize new Dimension(Scroller.getPreferredSize.getWidth.toInt, 500)
   this setDefaultCloseOperation WindowConstants.DO_NOTHING_ON_CLOSE
@@ -33,7 +33,7 @@ class KeyboardShortcutManager(xactions: List[XAction]) extends JFrame {
     val EscStroke = KeyStroke getKeyStroke (KeyEvent.VK_ESCAPE, 0, false)
     getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(EscStroke, Exit)
     getActionMap().put(Exit, new AbstractAction() {
-      val event = new WindowEvent(KeyboardShortcutManager.this,
+      val event = new WindowEvent(ShortcutManager.this,
                                   WindowEvent.WINDOW_CLOSING)
 
       override def actionPerformed(e: ActionEvent) =
@@ -44,7 +44,7 @@ class KeyboardShortcutManager(xactions: List[XAction]) extends JFrame {
   object EscapeWindowListener extends WindowAdapter {
 
     override def windowClosing(e: WindowEvent) =
-      KeyboardShortcutManager.this setVisible false
+      ShortcutManager.this setVisible false
   }
 }
 
