@@ -1,6 +1,7 @@
 package edu.upenn.psych.memory.keyboardmanager
 
 import java.awt.{ List => _, _ }
+import java.awt.event._
 import java.io.{ Console => _, _ }
 import javax.swing._
 import org.jdom._
@@ -9,17 +10,37 @@ import org.jdom.input._
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 
-class KeyboardShortcutManager(shortsFile: ShortcutsFile)  extends JFrame {
-  this setSize (500, 500)
-  this setDefaultCloseOperation JFrame.EXIT_ON_CLOSE
-  this setTitle "Keyboard Shortcuts Manager"
+class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
 
-  val scroller = new JScrollPane
-  scroller setViewportView new ShortcutsPanel(shortsFile)
-  scroller.getHorizontalScrollBar setUnitIncrement 15
-  scroller.getVerticalScrollBar setUnitIncrement 15
-  this setContentPane scroller
+  this setSize (500, 500)
+  this setDefaultCloseOperation WindowConstants.DO_NOTHING_ON_CLOSE
+  this addWindowListener EscapeWindowListener
+  this setTitle "Keyboard Shortcuts Manager"
+  this setContentPane Scroller
+
+  object Scroller extends JScrollPane {
+    this setViewportView new ShortcutsPanel(shortsFile)
+    getHorizontalScrollBar setUnitIncrement 15
+    getVerticalScrollBar setUnitIncrement 15
+    
+    val Exit = "exit"
+    val EscStroke = KeyStroke getKeyStroke (KeyEvent.VK_ESCAPE, 0, false)
+    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(EscStroke, Exit)
+    getActionMap().put(Exit, new AbstractAction() {
+      val event = new WindowEvent(KeyboardShortcutManager.this,
+                                  WindowEvent.WINDOW_CLOSING)
+
+      override def actionPerformed(e: ActionEvent) =
+        EscapeWindowListener windowClosing event
+    })
+  }
+
+  object EscapeWindowListener extends WindowAdapter {
+    override def windowClosing(e: WindowEvent) =
+      KeyboardShortcutManager.this.setVisible(false)
+  }
 }
+
 
 class ShortcutsPanel(shortsFile: ShortcutsFile) extends JPanel {
   this setLayout new BoxLayout(this, BoxLayout.Y_AXIS)
