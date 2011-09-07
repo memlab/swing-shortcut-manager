@@ -19,6 +19,7 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
   this setContentPane Scroller
 
   object Scroller extends JScrollPane {
+
     this setViewportView new ShortcutsPanel(shortsFile)
     getHorizontalScrollBar setUnitIncrement 15
     getVerticalScrollBar setUnitIncrement 15
@@ -36,13 +37,14 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
   }
 
   object EscapeWindowListener extends WindowAdapter {
+
     override def windowClosing(e: WindowEvent) =
       KeyboardShortcutManager.this.setVisible(false)
   }
 }
 
-
 class ShortcutsPanel(shortsFile: ShortcutsFile) extends JPanel {
+
   this setLayout new BoxLayout(this, BoxLayout.Y_AXIS)
   for { action <- shortsFile.boundActions
         short <- action.shortcuts } {
@@ -51,6 +53,7 @@ class ShortcutsPanel(shortsFile: ShortcutsFile) extends JPanel {
 }
 
 class ShortcutsFile(inputStream: InputStream) {
+
   val NameAttr = "name"
   val MaskAttr = "mask"
   val KeyAttr  = "key"
@@ -88,18 +91,20 @@ class ShortcutsFile(inputStream: InputStream) {
   }
 }
 
+class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
+
+  this setLayout new BoxLayout(this, BoxLayout.X_AXIS)
+  this setBorder BorderFactory.createLineBorder(Color.BLACK, 3)
+  this add new JLabel(actionName)
+  this add new JTextField
+}
+
 case class BoundAction(actionName: String, shortcuts: List[Shortcut])
 case class Shortcut(masks: List[Mask], keys: List[Key])
 sealed trait KeyElement
 case class Mask(name: String) extends KeyElement
 case class Key(name: String) extends KeyElement
 
-class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
-  this setLayout new BoxLayout(this, BoxLayout.X_AXIS)
-  this setBorder BorderFactory.createLineBorder(Color.BLACK, 3)
-  this add new JLabel(actionName)
-  this add new JTextField
-}
 
 object Main {
 
