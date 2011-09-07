@@ -21,7 +21,8 @@ mainClass in (Compile, run) :=
 
 //JAVA DEPENDENCIES
 libraryDependencies ++= Seq (
-  "jdom" % "jdom" % "1.1"
+  "jdom" % "jdom" % "1.1",
+  "jaxen" % "jaxen" % "1.1.1"
 )
 
 //SBT BEHAVIOR
