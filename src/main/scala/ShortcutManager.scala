@@ -50,6 +50,8 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
 
 class ShortcutsTable(xactions: List[XAction]) extends JTable {
 
+  println(xactions)
+
   this setModel ShortcutsTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
   this setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
@@ -59,6 +61,7 @@ class ShortcutsTable(xactions: List[XAction]) extends JTable {
   header setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
 
   object ShortcutsTableModel extends TableModel {
+
     val headers = List("Action", "Shortcut", "Default")
 
     override def getRowCount = xactions.length
@@ -67,13 +70,13 @@ class ShortcutsTable(xactions: List[XAction]) extends JTable {
     override def getColumnName(cx: Int) = headers(cx)
     override def getColumnClass(cx: Int) = classOf[String]
     override def getValueAt(rx: Int, cx: Int) =
-      if (rx >= xactions.length || cx >= headers.length || rx < 0 || cx < 0 )
+      if (rx >= xactions.length || cx >= headers.length || rx < 0 || cx < 0)
         null
       else {
         val xaction = xactions(rx)
         if (cx == 0) xaction.name
-        else if (cx == 1) xaction.shortcut.getOrElse("")
-        else xaction.shortcut.getOrElse("")
+        else if (cx == 1) xaction.shortcut.getOrElse("<None>")
+        else xaction.shortcut.getOrElse("<None>")
       }
     override def setValueAt(value: AnyRef, rx: Int, cx: Int) = ()
     override def addTableModelListener(l: TableModelListener) = ()

@@ -2,7 +2,8 @@
 <!--
 Sample Actions xml file.
 
-Acceptable names for masks are "alt", "command", "control", "menu", and "shift".
+Acceptable names for masks are "alt", "command", "control", "menu", and
+"shift".
 "menu" means Command on Mac and Control on other platforms.
 -->
 <actions>
@@ -11,61 +12,61 @@ Acceptable names for masks are "alt", "command", "control", "menu", and "shift".
   <action class="behaviors.singleact.DoneAction"
           name="Mark Complete"
           tooltip="Mark Annotation File Complete">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <mask keyname="shift" />
       <key keyname="D" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.ExitAction"
           name="Exit">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <key keyname="X" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.OpenAudioLocationAction"
           name="Add Audio Files..."
           tooltip="Select File or Folder">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <key keyname="O" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.PlayPauseAction"
           name="Play/Pause">
-    <binding>
+    <shortcut>
       <key keyname="space" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.ReplayLast200MillisAction"
           name="Replay Last 200 ms">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <key keyname="Z" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.StopAction"
           name="Go to Start">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <key keyname="S" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.ReturnToLastPositionAction"
           name="Undo Play"
           tooltip="Return to the position prior to hitting play">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <key keyname="L" />
-    </binding>
+    </shortcut>
   </action>
   <action class="behaviors.singleact.ReplayLastPositionAction"
           name="Replay">
-    <binding>
+    <shortcut>
       <mask keyname="menu" />
       <key keyname="R" />
-    </binding>
+    </shortcut>
   </action>
 
 
