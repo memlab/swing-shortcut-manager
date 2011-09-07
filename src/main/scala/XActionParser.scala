@@ -5,13 +5,11 @@ import java.io.InputStream
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 
-import org.jdom.Element
+import org.jdom.{ Attribute, Element }
 import org.jdom.input.SAXBuilder
 import org.jdom.xpath.XPath
 
 class XActionsParser(inputStream: InputStream) {
-
-  val xactions: List[XAction] = parseXActions()
 
   private val ClassAttr = "class"
   private val KeyNameAttr = "keyname"
@@ -21,13 +19,21 @@ class XActionsParser(inputStream: InputStream) {
   private val KeyName  = "key"
   private val MaskName = "mask"
 
+  lazy val xactions: List[XAction] = parseXActions()
+
   private def parseXActions(): List[XAction] = {
+
+    def xpathEls(query: String, context: AnyRef): List[Element] = {
+      val xpath = XPath newInstance query
+      xpath.selectNodes(context).asScala.map {
+        _.asInstanceOf[Element]
+      }.toList
+    }
+
     val builder = new SAXBuilder
     val doc = builder build inputStream
-    val xpath = XPath.newInstance("//action")
-    val actionEls: Seq[Element] = xpath.selectNodes(doc).asScala.map {
-      _.asInstanceOf[Element]
-    }
+    val actionEls = xpathEls("//action", doc)
+
     def parseXAction(act: Element): XAction = {
       val name = act getAttributeValue NameAttr
       val clazz = act getAttributeValue ClassAttr
@@ -35,11 +41,10 @@ class XActionsParser(inputStream: InputStream) {
 
       def parseShortcut(short: Element): Shortcut = {
         val keys = short.getChildren.asScala.map { _.asInstanceOf[Element] }
-        val (maskKeyEls, nonMaskKeyEls) =
-          keys.partition { _.getName == MaskName }
+        val maskKeyEls = xpathEls(".//mask", short)
+        val nonMaskKeyEls = xpathEls(".//key", short)
         val maskKeys = maskKeyEls.map { el =>
-          val keyName = el getAttributeValue KeyNameAttr
-          MaskKey(keyName)
+          MaskKey(el getAttributeValue KeyNameAttr)
         }
         val nonMaskKey = {
           val el = nonMaskKeyEls head
@@ -56,10 +61,6 @@ class XActionsParser(inputStream: InputStream) {
       XAction(clazz, name, tooltipOpt, shortcutOpt)
     }
     val xactions = actionEls map { parseXAction(_) }
-    xactions.foreach(println)
-
-    sys.exit()
-
     xactions toList
   }
 }
