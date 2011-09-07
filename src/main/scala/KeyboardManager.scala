@@ -4,6 +4,8 @@ import java.awt.{ List => _, _ }
 import java.awt.event._
 import java.io.{ Console => _, _ }
 import javax.swing._
+import javax.swing.table._
+import javax.swing.event._
 import org.jdom._
 import org.jdom.input._
 
@@ -21,7 +23,7 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
 
   object Scroller extends JScrollPane {
 
-    this setViewportView new ShortcutsPanel(shortsFile)
+    this setViewportView new ShortcutsTable(shortsFile)
     getHorizontalScrollBar setUnitIncrement 15
     getVerticalScrollBar setUnitIncrement 15
 
@@ -44,12 +46,41 @@ class KeyboardShortcutManager(shortsFile: ShortcutsFile) extends JFrame {
   }
 }
 
-class ShortcutsPanel(shortsFile: ShortcutsFile) extends JPanel {
+class ShortcutsTable(shortsFile: ShortcutsFile) extends JTable {
 
-  this setLayout new BoxLayout(this, BoxLayout.Y_AXIS)
-  for { action <- shortsFile.boundActions
-        short <- action.shortcuts } {
-    this add new ShortcutDisplay(action.actionName, short)
+  this setModel ShortcutsTableModel
+  this setSelectionMode ListSelectionModel.SINGLE_SELECTION
+  this setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+  val header = getTableHeader()
+  header setReorderingAllowed false
+  header setResizingAllowed true
+  header setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+
+  object ShortcutsTableModel extends TableModel {
+    val headers = List("Action", "Shortcut", "Default")
+    val contents = new m.ListBuffer[m.ListBuffer[JLabel]]()
+    for { action <- shortsFile.boundActions
+          short <- action.shortcuts } {
+      val buf = new m.ListBuffer[JLabel]()
+      buf ++= List(new JLabel(action.actionName),
+                  new JLabel(short.toString),
+                  new JLabel(short.toString))
+      contents append buf
+    }
+
+    override def getRowCount = contents.length
+    override def getColumnCount = headers.length
+    override def isCellEditable(rx: Int, cx: Int) = cx == 1
+    override def getColumnName(cx: Int) = headers(cx)
+    override def getColumnClass(cx: Int) = classOf[String]
+    override def getValueAt(rx: Int, cx: Int) =
+      if (rx >= contents.length || cx >= contents(rx).length) null
+      else contents(rx)(cx).getText
+    override def setValueAt(value: AnyRef, rx: Int, cx: Int) =
+      if (! (rx >= contents.length || cx >= contents(rx).length))
+        contents(rx)(cx) = new JLabel(value.toString)
+    override def addTableModelListener(l: TableModelListener) = ()
+    override def removeTableModelListener(l: TableModelListener) = ()
   }
 }
 
@@ -71,23 +102,26 @@ class ShortcutsFile(inputStream: InputStream) {
       val actionEl = rawActionEl.asInstanceOf[Element]
       val actionName = actionEl getAttributeValue NameAttr
       val shortsBuf = new m.ListBuffer[Shortcut]
-      for (rawBindingEl <- actionEl.getChildren.asScala) {
-        val bindingEl = rawBindingEl.asInstanceOf[Element]
-        val maskBuf = new m.ListBuffer[Mask]()
-        val keyBuf = new m.ListBuffer[Key]()
-        for (rawMaskOrKeyEl <- bindingEl.getChildren.asScala) {
-          val maskOrKeyEl = rawMaskOrKeyEl.asInstanceOf[Element]
-          val attrName = maskOrKeyEl getAttributeValue NameAttr
-          maskOrKeyEl.getName match {
-            case KeyAttr  => keyBuf  append Key(attrName)
-            case MaskAttr => maskBuf append Mask(attrName)
+      val bindingChildren = actionEl.getChildren.asScala
+      if (bindingChildren.nonEmpty) {
+        for (rawBindingEl <- bindingChildren) {
+          val bindingEl = rawBindingEl.asInstanceOf[Element]
+          val maskBuf = new m.ListBuffer[Mask]()
+          val keyBuf = new m.ListBuffer[Key]()
+          for (rawMaskOrKeyEl <- bindingEl.getChildren.asScala) {
+            val maskOrKeyEl = rawMaskOrKeyEl.asInstanceOf[Element]
+            val attrName = maskOrKeyEl getAttributeValue NameAttr
+            maskOrKeyEl.getName match {
+              case KeyAttr  => keyBuf  append Key(attrName)
+              case MaskAttr => maskBuf append Mask(attrName)
+            }
           }
+          val short = Shortcut(maskBuf.toList, keyBuf.toList)
+          shortsBuf append short
         }
-        val short = Shortcut(maskBuf.toList, keyBuf.toList)
-        shortsBuf append short
       }
-      if (shortsBuf.isEmpty == false)
-        boundActionsBuf append BoundAction(actionName, shortsBuf.toList)
+      else shortsBuf append Shortcut(Nil, Nil)
+      boundActionsBuf append BoundAction(actionName, shortsBuf.toList)
     }
     boundActionsBuf.toList
   }
