@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<!--
+Sample Actions xml file.
+
+Acceptable names for masks are "alt", "command", "control", "menu", "winkey".
+"platform" means Command on Mac and Control on other platforms.
+-->
+<actions>
+
+  <!-- Actions with keyboard shortcuts -->
+  <action class="behaviors.singleact.DoneAction"
+          name="Mark Complete"
+          tooltip="Mark Annotation File Complete">
+    <binding>
+      <mask name="menu" />
+      <mask name="shift" />
+      <key name="D" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.ExitAction"
+          name="Exit">
+    <binding>
+      <mask name="menu" />
+      <key name="X" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.OpenAudioLocationAction"
+          name="Add Audio Files..."
+          tooltip="Select File or Folder">
+    <binding>
+      <mask name="menu" />
+      <key name="O" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.PlayPauseAction"
+          name="Play/Pause">
+    <binding>
+      <mask name="menu" />
+      <key name="P" />
+    </binding>
+    <binding>
+      <key name="space" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.ReplayLast200MillisAction"
+          name="Replay Last 200 ms">
+    <binding>
+      <mask name="menu" />
+      <key name="Z" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.StopAction"
+          name="Go to Start">
+    <binding>
+      <mask name="menu" />
+      <key name="S" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.ReturnToLastPositionAction"
+          name="Undo Play"
+          tooltip="Return to the position prior to hitting play">
+    <binding>
+      <mask name="menu" />
+      <key name="L" />
+    </binding>
+  </action>
+  <action class="behaviors.singleact.ReplayLastPositionAction"
+          name="Replay">
+    <binding>
+      <mask name="menu" />
+      <key name="R" />
+    </binding>
+  </action>
+
+
+  <!-- Actions without keyboard shortcuts -->
+  <action class="behaviors.singleact.AboutAction"
+          name="About" />
+
+  <action class="behaviors.singleact.ContinueAnnotatingAction"
+          name="Continue Editing" />
+
+  <action class="behaviors.singleact.CheckUpdatesAction"
+          name="Check For Updates" />
+
+  <action class="behaviors.singleact.DeleteAnnotationAction"
+          name="Delete Annotation" />
+
+  <action class="behaviors.singleact.OpenWordpoolAction"
+          name="Select Wordpool..."
+          tooltip="Select Text File Containing Words in Audio File" />
+
+  <action class="behaviors.singleact.PreferencesAction"
+          name="Preferences..." />
+
+  <action class="behaviors.singleact.VisitTutorialSiteAction"
+          name="Program Homapage" />
+
+  <action class="behaviors.singleact.EditKeyboardShortcutsAction"
+          name="Edit Keyboard Shortcuts" />
+
+
+</actions>

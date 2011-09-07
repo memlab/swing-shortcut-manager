@@ -86,7 +86,8 @@ class ShortcutsFile(inputStream: InputStream) {
         val short = Shortcut(maskBuf.toList, keyBuf.toList)
         shortsBuf append short
       }
-      boundActionsBuf append BoundAction(actionName, shortsBuf.toList)
+      if (shortsBuf.isEmpty == false)
+        boundActionsBuf append BoundAction(actionName, shortsBuf.toList)
     }
     boundActionsBuf.toList
   }
@@ -120,16 +121,24 @@ class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
 case class BoundAction(actionName: String, shortcuts: List[Shortcut])
 
 case class Shortcut(masks: List[Mask], keys: List[Key]) {
-  import Shortcut.keyListRepr
-  override val toString = keyListRepr(masks) + " " + keyListRepr(keys)
+
+  import Shortcut._
+
+  override val toString = {
+    val masksStr = keyListRepr(masks)
+    val keysStr = keyListRepr(keys)
+    masksStr + { if(masksStr.length == 0) "" else sep } + keysStr
+  }
 }
 
 object Shortcut {
 
+  val sep = if (Properties.isMac) "" else "+"
+
   def keyListRepr(lst: List[KeyElement]) = {
     val sorted = lst sortWith { (f, s) => f.order < s.order }
     val reprs = sorted map { _.keyRepr }
-    reprs.mkString
+    reprs mkString sep
   }
 }
 
@@ -150,7 +159,8 @@ object Mask {
     case ControlKey.xmlName => ControlKey
     case ShiftKey.xmlName   => ShiftKey
     case WinKey.xmlName     => WinKey
-    case _                  => sys.error("unkown mask key: " + name)
+    case "menu"             => if (Properties.isMac) CommandKey else ControlKey
+    case _                  => sys.error("unknown mask key: " + name)
   }
 }
 
@@ -193,7 +203,7 @@ case class Key(name: String) extends KeyElement {
 object Main {
 
   def main(args: Array[String]) = {
-    val resourcePath = "/keyboard-shortcuts.xml"
+    val resourcePath = "/actions.xml"
     Option(Main.getClass.getResourceAsStream(resourcePath)) match {
       case Some(stream) => {
         val shortsFile = new ShortcutsFile(stream)
