@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 class KeyboardShortcutManager(shortsFile: ShortcutsFile)  extends JFrame {
   this setSize (500, 500)
   this setDefaultCloseOperation JFrame.EXIT_ON_CLOSE
-  this setTitle "Keyboard Manager"
+  this setTitle "Keyboard Shortcuts Manager"
 
   val scroller = new JScrollPane
   scroller setViewportView new ShortcutsPanel(shortsFile)
@@ -30,22 +30,48 @@ class ShortcutsPanel(shortsFile: ShortcutsFile) extends JPanel {
 }
 
 class ShortcutsFile(inputStream: InputStream) {
-  val builder = new SAXBuilder
-  val doc = builder build inputStream
-  val bindingsEl = doc.getRootElement
-  val actionEls: List[Any] = bindingsEl.getChildren.asScala.toList
-  val boundActionsBuf = new m.ListBuffer[BindableAction]()
-  for (rawActionEl <- actionEls) {
-    val actionEl = rawActionEl.asInstanceOf[Element]
-    val actionName = actionEl getAttributeValue "name"
-    val short = BindableAction(actionName, List(Shortcut(Nil, Nil)))
-    boundActionsBuf append short
+  val NameAttr = "name"
+  val MaskAttr = "mask"
+  val KeyAttr  = "key"
+
+  val boundActions: List[BoundAction] = parseStream()
+
+  private def parseStream(): List[BoundAction] = {
+    val builder = new SAXBuilder
+    val doc = builder build inputStream
+    val bindingsEl = doc.getRootElement
+    val actionEls: List[Any] = bindingsEl.getChildren.asScala.toList
+    val boundActionsBuf = new m.ListBuffer[BoundAction]()
+    for (rawActionEl <- actionEls) {
+      val actionEl = rawActionEl.asInstanceOf[Element]
+      val actionName = actionEl getAttributeValue NameAttr
+      val shortsBuf = new m.ListBuffer[Shortcut]
+      for (rawBindingEl <- actionEl.getChildren.asScala) {
+        val bindingEl = rawBindingEl.asInstanceOf[Element]
+        val maskBuf = new m.ListBuffer[Mask]()
+        val keyBuf = new m.ListBuffer[Key]()
+        for (rawMaskOrKeyEl <- bindingEl.getChildren.asScala) {
+          val maskOrKeyEl = rawMaskOrKeyEl.asInstanceOf[Element]
+          val attrName = maskOrKeyEl getAttributeValue NameAttr
+          maskOrKeyEl.getName match {
+            case KeyAttr  => keyBuf  append Key(attrName)
+            case MaskAttr => maskBuf append Mask(attrName)
+          }
+        }
+        val short = Shortcut(maskBuf.toList, keyBuf.toList)
+        shortsBuf append short
+      }
+      boundActionsBuf append BoundAction(actionName, shortsBuf.toList)
+    }
+    boundActionsBuf.toList
   }
-  val boundActions = boundActionsBuf.toList
 }
 
-case class BindableAction(actionName: String, shortcuts: List[Shortcut])
-case class Shortcut(masks: List[String], keys: List[String])
+case class BoundAction(actionName: String, shortcuts: List[Shortcut])
+case class Shortcut(masks: List[Mask], keys: List[Key])
+sealed trait KeyElement
+case class Mask(name: String) extends KeyElement
+case class Key(name: String) extends KeyElement
 
 class ShortcutDisplay(actionName: String, short: Shortcut) extends JPanel {
   this setLayout new BoxLayout(this, BoxLayout.X_AXIS)
