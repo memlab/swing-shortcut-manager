@@ -134,7 +134,6 @@ class ShortcutsTable(xactions: List[XAction]) extends RXTable {
         if (sel) setBackground(tab getSelectionBackground())
         else setBackground(tab.getBackground())
 
-        // setBorder(null)
         setBorder(
           BorderFactory.createEmptyBorder(0, leftRightPad, 0, leftRightPad))
 
