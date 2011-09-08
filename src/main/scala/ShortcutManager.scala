@@ -1,6 +1,6 @@
 package edu.upenn.psych.memory.keyboardmanager
 
-import java.awt.{ Color, Dimension }
+import java.awt.{ Color, Dimension, Insets }
 import java.awt.event.{ ActionEvent, KeyEvent, WindowAdapter, WindowEvent }
 
 import javax.swing.{ Box, BoxLayout }
@@ -8,8 +8,9 @@ import javax.swing.{ AbstractAction, BorderFactory, KeyStroke,
                      ListSelectionModel, WindowConstants }
 import javax.swing.{ JComponent, JFrame, JLabel, JPanel, JTable, JScrollPane,
                      JTextField }
-import javax.swing.table.TableModel
+import javax.swing.border.{ CompoundBorder, EmptyBorder }
 import javax.swing.event.TableModelListener
+import javax.swing.table.{ DefaultTableCellRenderer, TableModel }
 
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
@@ -17,7 +18,8 @@ import scala.util.Properties
 
 class ShortcutManager(xactions: List[XAction]) extends JFrame {
 
-  this setSize new Dimension(Scroller.getPreferredSize.getWidth.toInt, 500)
+  this setSize new Dimension(Scroller.getPreferredSize.getWidth.toInt,
+                             Scroller.getPreferredSize.getHeight.toInt)
   this setDefaultCloseOperation WindowConstants.DO_NOTHING_ON_CLOSE
   this addWindowListener EscapeWindowListener
   this setTitle "Keyboard Shortcuts Manager"
@@ -50,15 +52,15 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
 
 class ShortcutsTable(xactions: List[XAction]) extends JTable {
 
-  println(xactions)
-
   this setModel ShortcutsTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
-  this setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+
   val header = getTableHeader()
   header setReorderingAllowed false
   header setResizingAllowed true
-  header setBorder BorderFactory.createLineBorder(Color.BLACK, 1)
+
+  override def getCellRenderer(rx: Int, cx: Int) = ShortcutsCellRenderer
+  override def getDefaultRenderer(clazz: Class[_]) = ShortcutsCellRenderer
 
   object ShortcutsTableModel extends TableModel {
 
@@ -75,11 +77,24 @@ class ShortcutsTable(xactions: List[XAction]) extends JTable {
       else {
         val xaction = xactions(rx)
         if (cx == 0) xaction.name
-        else if (cx == 1) xaction.shortcut.getOrElse("<None>")
-        else xaction.shortcut.getOrElse("<None>")
+        else if (cx == 1) xaction.shortcut.getOrElse("")
+        else xaction.shortcut.getOrElse("")
       }
     override def setValueAt(value: AnyRef, rx: Int, cx: Int) = ()
     override def addTableModelListener(l: TableModelListener) = ()
     override def removeTableModelListener(l: TableModelListener) = ()
+  }
+
+  object ShortcutsCellRenderer extends DefaultTableCellRenderer {
+
+    override def getTableCellRendererComponent(
+      tab: JTable, value: AnyRef, sel: Boolean, foc: Boolean,
+      rx: Int, cx: Int) = {
+        val renderedComp =
+          super.getTableCellRendererComponent(
+            tab, value, sel, foc, rx, cx).asInstanceOf[JComponent]
+        renderedComp setBorder BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        renderedComp
+    }
   }
 }
