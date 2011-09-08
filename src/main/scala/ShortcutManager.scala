@@ -71,6 +71,8 @@ class ShortcutsTable(xactions: List[XAction]) extends RXTable {
   override def getDefaultEditor(clazz: Class[_]) =
     new ShortcutsCellEditor(getDefaultRenderer(clazz))
 
+  val leftRightPad = 10
+
   object ShortcutsMouseAdapter extends MouseAdapter {
 
     override def mouseClicked(e: MouseEvent) {
@@ -107,7 +109,11 @@ class ShortcutsTable(xactions: List[XAction]) extends RXTable {
       tab: JTable, value: AnyRef, sel: Boolean, rx: Int, cx: Int) = {
         val cmp = super.getTableCellEditorComponent(tab, value, sel, rx, cx)
         cmp match {
-          case jt: JTextField => jt setText ("  " + value.toString)
+          case jt: JTextField => {
+            jt setText value.toString
+            jt setBorder BorderFactory.createEmptyBorder(0, leftRightPad,
+                                                         0, leftRightPad)
+          }
           case _ =>
         }
         cmp
@@ -119,7 +125,7 @@ class ShortcutsTable(xactions: List[XAction]) extends RXTable {
     override def getTableCellRendererComponent(
       tab: JTable, value: AnyRef, sel: Boolean, foc: Boolean,
       rx: Int, cx: Int) = {
-        setText("  " + value.toString)
+        setText(value.toString)
 
         if (foc)
           setBorder(UIManager getBorder("Table.focusCellHighlightBorder"))
@@ -128,7 +134,9 @@ class ShortcutsTable(xactions: List[XAction]) extends RXTable {
         if (sel) setBackground(tab getSelectionBackground())
         else setBackground(tab.getBackground())
 
-        setBorder(null)
+        // setBorder(null)
+        setBorder(
+          BorderFactory.createEmptyBorder(0, leftRightPad, 0, leftRightPad))
 
         this
     }
