@@ -1,16 +1,18 @@
 package edu.upenn.psych.memory.keyboardmanager
 
 import java.awt.{ Color, Dimension, Insets }
-import java.awt.event.{ ActionEvent, KeyEvent, WindowAdapter, WindowEvent }
+import java.awt.event.{ ActionEvent, KeyEvent, MouseAdapter, MouseEvent,
+                        WindowAdapter, WindowEvent }
+import java.util.EventObject
 
 import javax.swing.{ Box, BoxLayout }
 import javax.swing.{ AbstractAction, BorderFactory, KeyStroke,
-                     ListSelectionModel, WindowConstants }
-import javax.swing.{ JComponent, JFrame, JLabel, JPanel, JTable, JScrollPane,
-                     JTextField }
-import javax.swing.border.{ CompoundBorder, EmptyBorder }
+                     ListSelectionModel, SwingUtilities, WindowConstants }
+import javax.swing.{ DefaultCellEditor, JComponent, JFrame, JLabel, JPanel,
+                     JTable, JScrollPane, JTextField, UIManager }
 import javax.swing.event.TableModelListener
-import javax.swing.table.{ DefaultTableCellRenderer, TableModel }
+import javax.swing.table.{ TableCellRenderer, TableModel }
+import javax.swing.text.JTextComponent
 
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
@@ -50,20 +52,31 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
   }
 }
 
-class ShortcutsTable(xactions: List[XAction]) extends JTable {
-
-  val topBottomPad = 0
+class ShortcutsTable(xactions: List[XAction]) extends RXTable {
 
   this setModel ShortcutsTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
-  this setRowHeight (getRowHeight + 2 * topBottomPad)
+  this setFillsViewportHeight true
+  this addMouseListener ShortcutsMouseAdapter
+  this setSelectAllForEdit true
 
   val header = getTableHeader()
   header setReorderingAllowed false
   header setResizingAllowed true
 
-  override def getCellRenderer(rx: Int, cx: Int) = ShortcutsCellRenderer
-  override def getDefaultRenderer(clazz: Class[_]) = ShortcutsCellRenderer
+  override def getCellRenderer(rx: Int, cx: Int) = new ShortcutsCellRenderer
+  override def getDefaultRenderer(clazz: Class[_]) = new ShortcutsCellRenderer
+  override def getCellEditor(rx: Int, cx: Int) =
+    new ShortcutsCellEditor(getCellRenderer(rx, cx))
+  override def getDefaultEditor(clazz: Class[_]) =
+    new ShortcutsCellEditor(getDefaultRenderer(clazz))
+
+  object ShortcutsMouseAdapter extends MouseAdapter {
+
+    override def mouseClicked(e: MouseEvent) {
+
+    }
+  }
 
   object ShortcutsTableModel extends TableModel {
 
@@ -88,18 +101,36 @@ class ShortcutsTable(xactions: List[XAction]) extends JTable {
     override def removeTableModelListener(l: TableModelListener) = ()
   }
 
-  object ShortcutsCellRenderer extends DefaultTableCellRenderer {
+  class ShortcutsCellEditor(rend: JTextField) extends DefaultCellEditor(rend) {
+
+    override def getTableCellEditorComponent(
+      tab: JTable, value: AnyRef, sel: Boolean, rx: Int, cx: Int) = {
+        val cmp = super.getTableCellEditorComponent(tab, value, sel, rx, cx)
+        cmp match {
+          case jt: JTextField => jt setText ("  " + value.toString)
+          case _ =>
+        }
+        cmp
+    }
+  }
+
+  class ShortcutsCellRenderer extends JTextField with TableCellRenderer {
 
     override def getTableCellRendererComponent(
       tab: JTable, value: AnyRef, sel: Boolean, foc: Boolean,
       rx: Int, cx: Int) = {
-        val renderedComp =
-          super.getTableCellRendererComponent(
-            tab, value, sel, foc, rx, cx).asInstanceOf[JComponent]
-        renderedComp.setBorder(
-          BorderFactory.createEmptyBorder(
-            topBottomPad, 10, topBottomPad, 10))
-        renderedComp
+        setText("  " + value.toString)
+
+        if (foc)
+          setBorder(UIManager getBorder("Table.focusCellHighlightBorder"))
+        else setBackground(tab getBackground)
+
+        if (sel) setBackground(tab getSelectionBackground())
+        else setBackground(tab.getBackground())
+
+        setBorder(null)
+
+        this
     }
   }
 }
