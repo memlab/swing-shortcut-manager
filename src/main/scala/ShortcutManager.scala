@@ -6,7 +6,7 @@ import java.awt.event.{ ActionEvent, KeyEvent, MouseAdapter, MouseEvent,
 import java.util.EventObject
 
 import javax.swing.{ Box, BoxLayout }
-import javax.swing.{ AbstractAction, BorderFactory, KeyStroke,
+import javax.swing.{ AbstractAction, BorderFactory, KeyStroke, JOptionPane,
                      ListSelectionModel, SwingUtilities, WindowConstants }
 import javax.swing.{ DefaultCellEditor, JButton, JComponent, JFrame, JLabel,
                      JPanel, JTable, JScrollPane, JTextField, UIManager }
@@ -56,7 +56,12 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
     object ResetButtonPanel extends JPanel {
       val but = new JButton(new AbstractAction("reset to defaults") {
         override def actionPerformed(e: ActionEvent) {
-          println("resetting shortcuts to defaults")
+          val res =
+            JOptionPane.showConfirmDialog(ShortcutManager.this,
+                                          "Reset all shortcuts to defaults?")
+          if (res == JOptionPane.YES_OPTION) {
+            println("resetting shortcuts to defaults")
+          }
         }
       })
       setLayout(new BoxLayout(this, BoxLayout.X_AXIS))
