@@ -1,3 +1,6 @@
+// (C) Rob Camick 2008
+//http://tips4java.wordpress.com/2008/10/20/table-select-all-editor/
+
 package edu.upenn.psych.memory.keyboardmanager;
 
 import java.awt.*;
@@ -7,9 +10,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.text.*;
-
-// (C) Rob Camick
-//http://tips4java.wordpress.com/2008/10/20/table-select-all-editor/
 
 /**
  * The RXTable provides some extensions to the default JTable
