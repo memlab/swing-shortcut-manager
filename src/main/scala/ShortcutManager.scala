@@ -52,8 +52,11 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
 
 class ShortcutsTable(xactions: List[XAction]) extends JTable {
 
+  val topBottomPad = 0
+
   this setModel ShortcutsTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
+  this setRowHeight (getRowHeight + 2 * topBottomPad)
 
   val header = getTableHeader()
   header setReorderingAllowed false
@@ -93,7 +96,9 @@ class ShortcutsTable(xactions: List[XAction]) extends JTable {
         val renderedComp =
           super.getTableCellRendererComponent(
             tab, value, sel, foc, rx, cx).asInstanceOf[JComponent]
-        renderedComp setBorder BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        renderedComp.setBorder(
+          BorderFactory.createEmptyBorder(
+            topBottomPad, 10, topBottomPad, 10))
         renderedComp
     }
   }
