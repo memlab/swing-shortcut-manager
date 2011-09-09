@@ -1,3 +1,6 @@
+//from Example Depot
+//http://www.exampledepot.com/egs/javax.swing/Key2Str.html
+
 package edu.upenn.psych.memory.keyboardmanager;
 
 import java.awt.event.InputEvent;

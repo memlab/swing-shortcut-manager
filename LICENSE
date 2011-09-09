@@ -1,7 +1,10 @@
 (c) 2011 Computational Memory Lab, UPenn, all rights reserved
 
-RXTableEditor.java is (c) Rob Camick 2008, presumed public domain
+RXTableEditor.java is from Rob Camick's blog, presumed public domain
 http://tips4java.wordpress.com/2008/10/20/table-select-all-editor/
+
+KeyUtil is from Example Depot, presumed public domain
+http://www.exampledepot.com/egs/javax.swing/Key2Str.html
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
