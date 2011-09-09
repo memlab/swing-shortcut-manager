@@ -1,7 +1,7 @@
 package edu.upenn.psych.memory.keyboardmanager
 
 import java.awt.{ Color, Dimension, Insets }
-import java.awt.event.{ ActionEvent, KeyEvent, MouseAdapter, MouseEvent,
+import java.awt.event.{ ActionEvent, KeyAdapter, KeyEvent,
                         WindowAdapter, WindowEvent }
 import java.net.URL
 import java.util.EventObject
@@ -136,7 +136,7 @@ class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
   this setModel ShortcutsTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
   this setFillsViewportHeight true
-  this addMouseListener ShortcutsMouseAdapter
+  this addKeyListener ShortcutsKeyAdapter
   this setSelectAllForEdit true
 
   for (c <- 0 until getColumnCount) {
@@ -163,10 +163,18 @@ class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
   override def getDefaultEditor(clazz: Class[_]) =
     new ShortcutsCellEditor(getDefaultRenderer(clazz))
 
-  object ShortcutsMouseAdapter extends MouseAdapter {
+  object ShortcutsKeyAdapter extends KeyAdapter {
 
-    override def mouseClicked(e: MouseEvent) {
+    val stack = new m.ListBuffer[KeyEvent]()
 
+    override def keyPressed(e: KeyEvent) {
+      stack append e
+    }
+
+    override def keyReleased(e: KeyEvent) {
+      if (e.getKeyChar != Character.MAX_VALUE) {
+        stack.clear()
+      }
     }
   }
 
