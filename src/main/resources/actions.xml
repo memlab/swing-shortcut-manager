@@ -36,8 +36,7 @@ Acceptable names for masks are "alt", "command", "control", "menu", and
   <action class="behaviors.singleact.PlayPauseAction"
           name="Play/Pause">
     <shortcut>
-      <mask keyname="menu" />
-      <key keyname="P" />
+      <key keyname="space" />
     </shortcut>
   </action>
   <action class="behaviors.singleact.ReplayLast200MillisAction"

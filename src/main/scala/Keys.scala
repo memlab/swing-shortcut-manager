@@ -25,10 +25,13 @@ case class Shortcut(stroke: KeyStroke) {
           case "meta"   => sysMeta
           case "shift"  => sysShift
           case "ESCAPE" => sysEscape
+          case ""       => "Space"
           case _        => el
         }
       }
-    newParts mkString sysSep
+    val repr = newParts mkString sysSep
+    println("<" + repr + ">")
+    repr
   }
 
   lazy val serialized: String = {
@@ -39,6 +42,7 @@ case class Shortcut(stroke: KeyStroke) {
       parts flatMap { el =>
         el match {
           case "pressed" => None
+          case "typed"   => None
           case _         => Some(el)
         }
       }
@@ -51,9 +55,14 @@ object Shortcut {
   val SerializationDelimiter = " "
   val MetaName = "meta"
   val CtrlName = "ctrl"
+  val SpaceName = "space"
 
   def parse(str: String): Shortcut = {
-    Shortcut(KeyStroke.getKeyStroke(str))
+    import java.lang.Character
+    val stroke =
+      if (str == SpaceName) KeyStroke.getKeyStroke(new Character(' '), 0)
+      else KeyStroke.getKeyStroke(str)
+    Shortcut(stroke)
   }.ensuring(_ != null, "could not parse keystroke: " + str)
 
   def normXmlKey(str: String) = {
