@@ -45,7 +45,14 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
     }
   }
 
-  def persistDefaults() = defaultXActions.foreach { xact => store(xact) }
+  def persistDefaults() {
+    defaultXActions.foreach { xact =>
+      retrieve(xact.className) match {
+        case Some(_) => 
+        case _       => store(xact)
+      }
+    }
+  }
 
   def retrieveAll(): Map[String, Option[Shortcut]] = {
     val classNames = defaultXActions map { _.className }
