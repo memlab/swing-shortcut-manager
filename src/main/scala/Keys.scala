@@ -51,7 +51,7 @@ object Shortcut {
 
   def parse(str: String): Shortcut = {
     Shortcut(KeyStroke.getKeyStroke(str))
-  }.ensuring(_ != null)
+  }.ensuring(_ != null, "could not parse keystroke: " + str)
 
   def normXmlKey(str: String) = {
     str match {
