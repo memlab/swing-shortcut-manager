@@ -31,7 +31,7 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
   private def store(xaction: XAction) {
     val key = xaction.className
     val value = xaction.shortcut match {
-      case Some(short) => short.toString
+      case Some(short) => short.serialized
       case None    => NoShortcut
     }
     prefs put (key, value)

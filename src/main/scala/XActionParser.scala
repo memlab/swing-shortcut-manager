@@ -43,15 +43,15 @@ class XActionsParser(url: URL) {
         val keys = short.getChildren.asScala.map { _.asInstanceOf[Element] }
         val maskKeyEls = xpathEls(".//mask", short)
         val nonMaskKeyEls = xpathEls(".//key", short)
-        val maskKeys = maskKeyEls.map { el =>
-          MaskKey(el getAttributeValue KeyNameAttr)
-        }
-        val nonMaskKey = {
-          val el = nonMaskKeyEls head
-          val keyName = el getAttributeValue KeyNameAttr
-          NonMaskKey(keyName)
-        }
-        Shortcut(maskKeys.toList, nonMaskKey)
+        def getNames(els: List[Element]) =
+          els.map { _.getAttributeValue(KeyNameAttr) }
+        val nonMaskKeys = getNames(nonMaskKeyEls)
+        val maskKeys = getNames(maskKeyEls).map(Shortcut.normXmlKey(_))
+        val serializedForm =
+          (maskKeys ++ nonMaskKeys).mkString(
+            Shortcut.SerializationDelimiter)
+
+        Shortcut.parse(serializedForm)
       }
 
       val shortcutOpt: Option[Shortcut] =
