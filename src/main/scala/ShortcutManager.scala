@@ -3,7 +3,9 @@ package edu.upenn.psych.memory.keyboardmanager
 import java.awt.{ Color, Dimension, Insets }
 import java.awt.event.{ ActionEvent, KeyEvent, MouseAdapter, MouseEvent,
                         WindowAdapter, WindowEvent }
+import java.net.URL
 import java.util.EventObject
+import java.util.prefs.Preferences
 
 import javax.swing.{ Box, BoxLayout }
 import javax.swing.{ AbstractAction, BorderFactory, KeyStroke, JOptionPane,
@@ -18,7 +20,47 @@ import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 import scala.util.Properties
 
-class ShortcutManager(xactions: List[XAction]) extends JFrame {
+class UserDB(namespace: String, defaultXActions: List[XAction]) {
+  require(namespace startsWith "/",
+          "namespace " + namespace + " is not absolute")
+
+  private val NoShortcut = "#"
+
+  private val prefs = Preferences.userRoot.node(namespace)
+  
+  private def store(xaction: XAction) {
+    val key = xaction.className
+    val value = xaction.shortcut match {
+      case Some(short) => short.toString
+      case None    => NoShortcut
+    }
+    prefs put (key, value)
+  }
+
+  private def retrieve(className: String): Option[Shortcut] = {
+    val key = className
+    Option(prefs get (key, null)) match {
+      case Some(NoShortcut) | None => None
+      case Some(shortcutStr)       => Some(Shortcut parse shortcutStr)
+    }
+  }
+
+  def persistDefaults() = defaultXActions.foreach { xact => store(xact) }
+
+  def retrieveAll(): Map[String, Option[Shortcut]] = {
+    val classNames = defaultXActions map { _.className }
+    val pairs: List[(String, Option[Shortcut])] =
+      classNames map { name => name -> retrieve(name) }
+    Map(pairs: _*)
+  }
+}
+
+
+class ShortcutManager(url: URL, namespace: String) extends JFrame {
+
+  private val defaultXActions = new XActionsParser(url).xactions
+  val userdb = new UserDB(namespace, defaultXActions)
+  userdb persistDefaults()
 
   this setSize(
     new Dimension(
@@ -37,7 +79,9 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
 
     object Scroller extends JScrollPane {
 
-      this setViewportView new ShortcutsTable(xactions)
+      this setViewportView new ShortcutsTable(defaultXActions.toIndexedSeq,
+                                              userdb)
+
       getHorizontalScrollBar setUnitIncrement 15
       getVerticalScrollBar setUnitIncrement 15
 
@@ -77,7 +121,8 @@ class ShortcutManager(xactions: List[XAction]) extends JFrame {
   }
 }
 
-class ShortcutsTable(xactions: List[XAction]) extends RXTable {
+class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
+                     userdb: UserDB) extends RXTable {
 
   val leftRightPad = 10
 
@@ -121,20 +166,27 @@ class ShortcutsTable(xactions: List[XAction]) extends RXTable {
   object ShortcutsTableModel extends TableModel {
 
     val headers = List("Action", "Shortcut", "Default")
+    val NoShortcutRepr = ""
 
-    override def getRowCount = xactions.length
+    override def getRowCount = defaultXActions.length
     override def getColumnCount = headers.length
     override def isCellEditable(rx: Int, cx: Int) = cx == 1
     override def getColumnName(cx: Int) = headers(cx)
     override def getColumnClass(cx: Int) = classOf[String]
     override def getValueAt(rx: Int, cx: Int) =
-      if (rx >= xactions.length || cx >= headers.length || rx < 0 || cx < 0)
-        null
+      if (rx >= defaultXActions.length || cx >= headers.length ||
+          rx < 0 || cx < 0) null
       else {
-        val xaction = xactions(rx)
-        if (cx == 0) xaction.name
-        else if (cx == 1) xaction.shortcut.getOrElse("")
-        else xaction.shortcut.getOrElse("")
+        val defXAction: XAction = defaultXActions(rx)
+        val curXShortcutOpt: Option[Shortcut] =
+          userdb.retrieveAll().getOrElse(defXAction.className, None)
+        if (cx == 0) defXAction.name
+        else if (cx == 1) curXShortcutOpt match {
+          case Some(shortcut) => shortcut
+          case None => NoShortcutRepr
+        }
+        else defXAction.shortcut.getOrElse(NoShortcutRepr)
+
       }
     override def setValueAt(value: AnyRef, rx: Int, cx: Int) = ()
     override def addTableModelListener(l: TableModelListener) = ()

@@ -1,6 +1,6 @@
 package edu.upenn.psych.memory.keyboardmanager
 
-import java.io.InputStream
+import java.net.URL
 
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
@@ -9,7 +9,7 @@ import org.jdom.{ Attribute, Element }
 import org.jdom.input.SAXBuilder
 import org.jdom.xpath.XPath
 
-class XActionsParser(inputStream: InputStream) {
+class XActionsParser(url: URL) {
 
   private val ClassAttr = "class"
   private val KeyNameAttr = "keyname"
@@ -31,7 +31,7 @@ class XActionsParser(inputStream: InputStream) {
     }
 
     val builder = new SAXBuilder
-    val doc = builder build inputStream
+    val doc = builder build url.openStream()
     val actionEls = xpathEls("//action", doc)
 
     def parseXAction(act: Element): XAction = {

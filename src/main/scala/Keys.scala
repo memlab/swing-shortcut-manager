@@ -77,3 +77,11 @@ case class Shortcut(masks: List[MaskKey], key: NonMaskKey) {
     masksStr + { if(masksStr.length == 0) "" else sep } + key.keyRepr
   }
 }
+
+object Shortcut {
+
+  def parse(str: String): Shortcut =
+    Shortcut(List(CommandKey), NonMaskKey("F"))
+}
+
+case class MalformedShortcutException(s: String) extends RuntimeException(s)
