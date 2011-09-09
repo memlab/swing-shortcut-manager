@@ -2,9 +2,18 @@
 <!--
 Sample Actions xml file.
 
+# Mask Names #
 Acceptable names for masks are "alt", "command", "control", "menu", and
 "shift".
 "menu" means Command on Mac and Control on other platforms.
+
+# Key Names #
+Key names must be as given by Swing, without the
+  initial "VK_". Full list here:
+http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
+
+# Misc #
+Capitalization of key/mask names does not matter.
 -->
 <actions>
 

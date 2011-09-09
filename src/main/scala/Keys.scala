@@ -53,8 +53,13 @@ case class Shortcut(stroke: KeyStroke) {
 object Shortcut {
   
   val SerializationDelimiter = " "
-  val MetaName = "meta"
-  val CtrlName = "ctrl"
+
+  val AltName   = "alt"
+  val CmdName   = "command"
+  val MenuName  = "menu"
+  val MetaName  = "meta"
+  val CtrlName  = "ctrl"
+  val ShiftName = "shift"
   val SpaceName = "space"
 
   def parse(str: String): Shortcut = {
@@ -66,10 +71,17 @@ object Shortcut {
   }.ensuring(_ != null, "could not parse keystroke: " + str)
 
   def normXmlKey(str: String) = {
-    str match {
-      case "menu"    => if (Properties.isMac) MetaName else CtrlName
-      case "command" => MetaName
-      case _         => str
+    val noMenu =
+      str match {
+        case MenuName => if (Properties.isMac) MetaName else CtrlName
+        case CmdName  => MetaName
+        case _        => str
+      }
+    val norm = noMenu.toLowerCase match {
+      case nm @ (AltName | MetaName | CtrlName | ShiftName) => nm
+      case nm => nm.toUpperCase
     }
+    println(str + " normalized to: " + norm)
+    norm
   }
 }
