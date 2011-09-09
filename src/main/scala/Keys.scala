@@ -8,21 +8,24 @@ import scala.util.Properties
 case class Shortcut(stroke: KeyStroke) {
 
   val sysSep   = if (Properties.isMac) ""  else "+"
-  val sysAlt   = if (Properties.isMac) "⌥" else "Alt"
-  val sysCtrl  = if (Properties.isMac) "^" else "Ctrl"
-  val sysMeta  = if (Properties.isMac) "⌘" else "Meta"
-  val sysShift = if (Properties.isMac) "⇧" else "Shift"
+
+  val sysAlt    = if (Properties.isMac) "⌥" else "Alt"
+  val sysCtrl   = if (Properties.isMac) "^" else "Ctrl"
+  val sysMeta   = if (Properties.isMac) "⌘" else "Meta"
+  val sysShift  = if (Properties.isMac) "⇧" else "Shift"
+  val sysEscape = if (Properties.isMac) "⎋" else "Esc"
 
   override val toString = {
     val parts = serialized.split(Shortcut.SerializationDelimiter).toList 
     val newParts: List[String] =
       parts map { el =>
         el match {
-          case "alt"   => sysAlt
-          case "ctrl"  => sysCtrl
-          case "meta"  => sysMeta
-          case "shift" => sysShift
-          case _       => el
+          case "alt"    => sysAlt
+          case "ctrl"   => sysCtrl
+          case "meta"   => sysMeta
+          case "shift"  => sysShift
+          case "ESCAPE" => sysEscape
+          case _        => el
         }
       }
     newParts mkString sysSep
