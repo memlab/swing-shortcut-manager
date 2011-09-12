@@ -8,9 +8,9 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-public class KeyUtils {
+public class UnsafeKeyUtils {
 
-    public static String serialize(KeyStroke key) {
+    public static String getInternalFormOrNull(KeyStroke key) {
         StringBuffer s = new StringBuffer(50);
         int m = key.getModifiers();
 
@@ -26,13 +26,16 @@ public class KeyUtils {
         if ((m & (InputEvent.ALT_DOWN_MASK|InputEvent.ALT_MASK)) != 0) {
             s.append("alt ");
         }
-        if ((m & (InputEvent.BUTTON1_DOWN_MASK|InputEvent.BUTTON1_MASK)) != 0) {
+        if ((m &
+             (InputEvent.BUTTON1_DOWN_MASK|InputEvent.BUTTON1_MASK)) != 0) {
             s.append("button1 ");
         }
-        if ((m & (InputEvent.BUTTON2_DOWN_MASK|InputEvent.BUTTON2_MASK)) != 0) {
+        if ((m &
+             (InputEvent.BUTTON2_DOWN_MASK|InputEvent.BUTTON2_MASK)) != 0) {
             s.append("button2 ");
         }
-        if ((m & (InputEvent.BUTTON3_DOWN_MASK|InputEvent.BUTTON3_MASK)) != 0) {
+        if ((m &
+             (InputEvent.BUTTON3_DOWN_MASK|InputEvent.BUTTON3_MASK)) != 0) {
             s.append("button3 ");
         }
 
@@ -57,7 +60,7 @@ public class KeyUtils {
         return s.toString();
     }
 
-    public static String getKeyText(int keyCode) {
+    private static String getKeyText(int keyCode) {
         if (keyCode >= KeyEvent.VK_0 && keyCode <= KeyEvent.VK_9 ||
             keyCode >= KeyEvent.VK_A && keyCode <= KeyEvent.VK_Z) {
             return String.valueOf((char)keyCode);
@@ -157,7 +160,8 @@ public class KeyUtils {
           case KeyEvent.VK_DEAD_OGONEK: return "DEAD_OGONEK";
           case KeyEvent.VK_DEAD_IOTA: return "DEAD_IOTA";
           case KeyEvent.VK_DEAD_VOICED_SOUND: return "DEAD_VOICED_SOUND";
-          case KeyEvent.VK_DEAD_SEMIVOICED_SOUND: return "DEAD_SEMIVOICED_SOUND";
+          case KeyEvent.VK_DEAD_SEMIVOICED_SOUND:
+              return "DEAD_SEMIVOICED_SOUND";
 
           case KeyEvent.VK_AMPERSAND: return "AMPERSAND";
           case KeyEvent.VK_ASTERISK: return "ASTERISK";

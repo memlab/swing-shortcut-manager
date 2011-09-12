@@ -5,7 +5,6 @@ import java.awt.event.{ ActionEvent, KeyAdapter, KeyEvent,
                         WindowAdapter, WindowEvent }
 import java.net.URL
 import java.util.EventObject
-import java.util.prefs.Preferences
 
 import javax.swing.{ Box, BoxLayout }
 import javax.swing.{ AbstractAction, BorderFactory, KeyStroke, JOptionPane,
@@ -20,54 +19,12 @@ import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 import scala.util.Properties
 
-class UserDB(namespace: String, defaultXActions: List[XAction]) {
-  require(namespace startsWith "/",
-          "namespace " + namespace + " is not absolute")
-
-  private val NoShortcut = "#"
-
-  private val prefs = Preferences.userRoot.node(namespace)
-  
-  private def store(xaction: XAction) {
-    val key = xaction.className
-    val value = xaction.shortcut match {
-      case Some(short) => short.serialized
-      case None    => NoShortcut
-    }
-    prefs put (key, value)
-  }
-
-  private def retrieve(className: String): Option[Shortcut] = {
-    val key = className
-    Option(prefs get (key, null)) match {
-      case Some(NoShortcut) | None => None
-      case Some(shortcutStr)       => Some(Shortcut parse shortcutStr)
-    }
-  }
-
-  def persistDefaults() {
-    defaultXActions.foreach { xact =>
-      retrieve(xact.className) match {
-        case Some(_) => 
-        case _       => store(xact)
-      }
-    }
-  }
-
-  def retrieveAll(): Map[String, Option[Shortcut]] = {
-    val classNames = defaultXActions map { _.className }
-    val pairs: List[(String, Option[Shortcut])] =
-      classNames map { name => name -> retrieve(name) }
-    Map(pairs: _*)
-  }
-}
-
-
 class ShortcutManager(url: URL, namespace: String) extends JFrame {
 
-  private val defaultXActions = new XActionsParser(url).xactions
+  private val defaultXActions = new XActionParser(url).xactions
   val userdb = new UserDB(namespace, defaultXActions)
   userdb persistDefaults()
+  sys.exit()
 
   this setSize(
     new Dimension(
