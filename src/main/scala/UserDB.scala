@@ -24,7 +24,6 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
     Option(prefs get (key, null)) match {
       case Some(NoShortcut) | None => None
       case Some(storedStr)       => {
-        println("stored: <" + storedStr + ">")
         Shortcut.fromInternalForm(storedStr) match {
           case opt @ Some(_) => opt
           case None => {
@@ -37,10 +36,10 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
     }
   }
 
-  def persistDefaults() {
+  def persistDefaults(overwrite: Boolean) {
     defaultXActions.foreach { xact =>
       retrieve(xact.className) match {
-        case Some(_) => 
+        case Some(_) if overwrite == false =>
         case _       => store(xact)
       }
     }

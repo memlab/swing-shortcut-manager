@@ -23,8 +23,7 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
 
   private val defaultXActions = new XActionParser(url).xactions
   val userdb = new UserDB(namespace, defaultXActions)
-  userdb persistDefaults()
-  sys.exit()
+  userdb persistDefaults false
 
   this setSize(
     new Dimension(
