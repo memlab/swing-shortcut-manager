@@ -43,6 +43,8 @@ case class Shortcut(stroke: KeyStroke) {
         }
       }
     }.filterNot{ Set("typed", "pressed", "released") contains _ }
+     .map{ _.toLowerCase.capitalize }
+
     val repr = newParts mkString sysSep
     repr
   }
