@@ -19,7 +19,22 @@ class XActionParser(url: URL) {
   private val KeyName  = "key"
   private val MaskName = "mask"
 
-  lazy val xactions: List[XAction] = parseXActions()
+  lazy val xactions: List[XAction] = {
+    val acts = parseXActions()
+    val shortcuts = acts map { _.shortcut }
+    val names = acts map { _.className }
+    def noDups[A](lst: List[A]) = {
+      for (el <- lst) {
+        if (lst.count{ el == _ } > 1)
+          throw ShortcutFileFormatException(
+            "shortcuts file contains duplicate: " + el
+          )
+      }
+    }
+    noDups(names)
+    noDups(shortcuts)
+    acts
+  }
 
   private def xpathEls(query: String, context: AnyRef): List[Element] = {
     val xpath = XPath newInstance query
@@ -65,3 +80,6 @@ class XActionParser(url: URL) {
     Shortcut fromExternalForm (maskKeyNames, nonMaskKeyNames)
   }
 }
+
+case class ShortcutFileFormatException(msg: String)
+  extends RuntimeException(msg)

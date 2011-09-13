@@ -45,7 +45,7 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
 
     object Scroller extends JScrollPane {
 
-      this setViewportView new ShortcutTable(defaultXActions.toIndexedSeq,
+      this setViewportView new ShortcutTable(defaultXActions.toArray,
                                               userdb)
 
       this.setHorizontalScrollBarPolicy(
@@ -93,7 +93,7 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
   }
 }
 
-class ShortcutTable(defaultXActions: IndexedSeq[XAction],
+class ShortcutTable(defaultXActions: Array[XAction],
                      userdb: UserDB) extends JTable {
 
   val leftRightPad = 10
@@ -122,6 +122,8 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
 
   override def getCellRenderer(rx: Int, cx: Int) = new ShortcutCellRenderer
   override def getDefaultRenderer(clazz: Class[_]) = new ShortcutCellRenderer
+
+  def updateShortcut(o: Shortcut, n: Shortcut) = ()
 
   object ShortcutKeyAdapter extends KeyAdapter {
 
@@ -160,6 +162,7 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
       swapOpt match {
         case Some(ShortcutSwap(o, n)) => {
           println("replacing " + o + " with " + n)
+          tab.updateShortcut(o, n)
         }
         case None =>
       }
