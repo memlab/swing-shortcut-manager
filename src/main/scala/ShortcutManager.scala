@@ -177,7 +177,7 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
 
         val (rs, cs) = (tab.getSelectedRow(), tab.getSelectedColumn())
         val outerBorder =
-          if (rs == rx && cx != 1)
+          if (rs == rx)
             UIManager.getBorder("Table.focusCellHighlightBorder")
           else BorderFactory.createEmptyBorder(1, 1, 1, 1)
         val innerBorder =
