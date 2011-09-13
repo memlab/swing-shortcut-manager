@@ -147,24 +147,6 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
     </shortcut>
   </action>
 
-  <action class="behaviors.multiact.ZoomAction"
-          arg="behaviors.multiact.ZoomAction.Direction.IN"
-          name="Zoom In">
-    <shortcut>
-      <mask keyname="menu" />
-      <key keyname="RIGHT" />
-    </shortcut>
-  </action>
-
-  <action class="behaviors.multiact.ZoomAction"
-          arg="behaviors.multiact.ZoomAction.Direction.OUT"
-          name="Zoom Out">
-    <shortcut>
-      <mask keyname="menu" />
-      <key keyname="LEFT" />
-    </shortcut>
-  </action>
-
   <action class="behaviors.multiact.Last200PlusMoveAction"
           arg="behaviors.multiact.Last200PlusMoveAction.Direction.BACKWARD"
           name="Backward Small Amount then Replay Last 200 ms">

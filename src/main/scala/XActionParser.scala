@@ -15,15 +15,16 @@ class XActionParser(url: URL) {
   private val KeyNameAttr = "keyname"
   private val NameAttr = "name"
   private val TooltipAttr = "tooltip"
+  private val ArgAttr = "arg"
 
   private val KeyName  = "key"
   private val MaskName = "mask"
 
   lazy val xactions: List[XAction] = {
     val acts = parseXActions()
-    val shortcuts = acts map { _.shortcut }
-    val names = acts map { _.className }
-    def noDups[A](lst: List[A]) = {
+    val shortcuts: List[Shortcut] = acts.flatMap { _.shortcut }
+    val ids: List[String] = acts map { _.id }
+    def assertNoDups[A](lst: List[A]) = {
       for (el <- lst) {
         if (lst.count{ el == _ } > 1)
           throw ShortcutFileFormatException(
@@ -31,8 +32,8 @@ class XActionParser(url: URL) {
           )
       }
     }
-    noDups(names)
-    noDups(shortcuts)
+    assertNoDups(ids)
+    assertNoDups(shortcuts)
     acts
   }
 
@@ -59,11 +60,13 @@ class XActionParser(url: URL) {
     val name = act getAttributeValue NameAttr
     val clazz = act getAttributeValue ClassAttr
     val tooltipOpt = Option(act getAttributeValue TooltipAttr)
+    val argOpt = Option(act getAttributeValue ArgAttr)
+    val baseXAction = XAction(clazz, argOpt, name, tooltipOpt, None)
 
-    if (act.getChildren.size == 0) Some(XAction(clazz, name, tooltipOpt, None))
+    if (act.getChildren.size == 0) Some(baseXAction)
     else {
       parseShortcut(act.getChildren.get(0).asInstanceOf[Element]) match {
-        case opt @ Some(_) => Some(XAction(clazz, name, tooltipOpt, opt))
+        case opt @ Some(_) => Some(baseXAction.copy(shortcut = opt))
         case None => None
       }
     }
