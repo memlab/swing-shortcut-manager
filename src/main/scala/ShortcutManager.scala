@@ -1,7 +1,7 @@
 package edu.upenn.psych.memory.shortcutmanager
 
 import java.awt.{ Color, Dimension, Insets }
-import java.awt.event.{ ActionEvent, KeyAdapter, KeyEvent,
+import java.awt.event.{ ActionEvent, KeyAdapter, KeyEvent, InputEvent,
                         WindowAdapter, WindowEvent }
 import java.net.URL
 import java.util.EventObject
@@ -125,17 +125,67 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
 
   object ShortcutKeyAdapter extends KeyAdapter {
 
-    val stack = new m.ListBuffer[KeyEvent]()
+    private val tab = ShortcutTable.this
+    private val downKeys = new m.ListBuffer[Int]()
+    private val maskCodes = Set(KeyEvent.VK_ALT, KeyEvent.VK_CONTROL,
+                        KeyEvent.VK_SHIFT, KeyEvent.VK_META)
+    private val standaloneKeys = Set(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT)
+
+    private def downKeyPartition() =
+      downKeys.toList.partition { maskCodes contains _ }
+
+    private def visualize(): String = {
+      downKeys.toList.map { key =>
+        Shortcut(KeyStroke.getKeyStroke(key, 0)).toString
+      }
+    }.toString
+
+
+    private def isValidShortcut(codes: List[Int]) = {
+      val (maskKeys, nonMaskKeys) = downKeyPartition()
+      if (nonMaskKeys.length == 1) {
+        val atLeastOneNonShiftMask = {
+          val nonShifts = maskKeys.filterNot { _ == KeyEvent.VK_SHIFT }
+          nonShifts.length > 0
+        }
+        val standalone = standaloneKeys.contains(nonMaskKeys.head)
+        atLeastOneNonShiftMask || standalone
+      }
+      else false
+    }
 
     override def keyPressed(e: KeyEvent) {
-      stack append e
-    }
-
-    override def keyReleased(e: KeyEvent) {
-      if (e.getKeyChar != Character.MAX_VALUE) {
-        stack.clear()
+      val rs = tab.getSelectedRow()
+      if (rs >= 0) {
+        tab.getModel.getValueAt(rs, 1) match {
+          case Shortcut(stroke) => {
+            val code = e.getKeyCode
+            downKeys append code
+            if (isValidShortcut(downKeys.toList)) {
+              val (maskKeys, nonMaskKeys) = downKeyPartition()
+              val masks =
+                maskKeys map { keyCode: Int =>
+                  keyCode match {
+                    case KeyEvent.VK_ALT     => InputEvent.ALT_DOWN_MASK
+                    case KeyEvent.VK_CONTROL => InputEvent.CTRL_DOWN_MASK
+                    case KeyEvent.VK_META    => InputEvent.META_DOWN_MASK
+                    case KeyEvent.VK_SHIFT   => InputEvent.SHIFT_DOWN_MASK
+                  }
+                }
+              val modifier = masks.fold(0) { _ | _ }
+              val newStroke =
+                KeyStroke.getKeyStroke(nonMaskKeys.head, modifier)
+              val short = Shortcut(newStroke)
+              println("binding: " + short)
+              downKeys.clear()
+            }
+          }
+          case _ =>
+        }
       }
     }
+
+    override def keyReleased(e: KeyEvent): Unit = downKeys.clear()
   }
 
   object ShortcutTableModel extends TableModel {
@@ -161,7 +211,6 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
           case None => NoShortcutRepr
         }
         else defXAction.shortcut.getOrElse(NoShortcutRepr)
-
       }
     override def setValueAt(value: AnyRef, rx: Int, cx: Int) = ()
     override def addTableModelListener(l: TableModelListener) = ()
@@ -188,7 +237,6 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
           if (rs == rx && cx == 1) tab.getSelectionBackground()
           else tab.getBackground()
         this setBackground background
-
         this
     }
   }
