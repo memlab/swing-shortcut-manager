@@ -26,18 +26,6 @@ public class UnsafeKeyUtils {
         if ((m & (InputEvent.ALT_DOWN_MASK|InputEvent.ALT_MASK)) != 0) {
             s.append("alt ");
         }
-        if ((m &
-             (InputEvent.BUTTON1_DOWN_MASK|InputEvent.BUTTON1_MASK)) != 0) {
-            s.append("button1 ");
-        }
-        if ((m &
-             (InputEvent.BUTTON2_DOWN_MASK|InputEvent.BUTTON2_MASK)) != 0) {
-            s.append("alt ");
-        }
-        if ((m &
-             (InputEvent.BUTTON3_DOWN_MASK|InputEvent.BUTTON3_MASK)) != 0) {
-            s.append("meta ");
-        }
 
         switch (key.getKeyEventType()) {
         case KeyEvent.KEY_TYPED:

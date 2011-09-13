@@ -7,15 +7,17 @@ import scala.util.Properties
 
 case class Shortcut(stroke: KeyStroke) {
 
-  // val sysSep   = if (Properties.isMac) ""  else "+"
+  private def ifMac(macRepr: String, winLinRepr: String) =
+    if (Properties.isMac) macRepr else winLinRepr
 
-  // val sysAlt    = if (Properties.isMac) "⌥" else "Alt"
-  // val sysCtrl   = if (Properties.isMac) "^" else "Ctrl"
-  // val sysMeta   = if (Properties.isMac) "⌘" else "Meta"
-  // val sysShift  = if (Properties.isMac) "⇧" else "Shift"
-  // val sysEscape = if (Properties.isMac) "⎋" else "Esc"
+  lazy val sysSep    = ifMac("", "+")
+  lazy val sysAlt    = ifMac("⌥", "Alt")
+  lazy val sysCtrl   = ifMac("^", "Ctrl")
+  lazy val sysMeta   = ifMac("⌘", "Meta")
+  lazy val sysShift  = ifMac("⇧", "Shift")
+  lazy val sysEscape = ifMac("⎋", "Esc")
 
-  val internalForm: String =
+  lazy val internalForm: String =
     Option(UnsafeKeyUtils.getInternalFormOrNull(stroke)) match {
       case Some(str) => str
       case None => {
@@ -26,41 +28,33 @@ case class Shortcut(stroke: KeyStroke) {
       }
     }
 
-  // val sysForm = {
-  //   val parts = serialized.split(Shortcut.SerializationDelimiter).toList 
-  //   val newParts: List[String] =
-  //     parts map { el =>
-  //       el match {
-  //         case "alt"    => sysAlt
-  //         case "ctrl"   => sysCtrl
-  //         case "meta"   => sysMeta
-  //         case "shift"  => sysShift
-  //         case "ESCAPE" => sysEscape
-  //         case ""       => "Space"
-  //         case _        => el
-  //       }
-  //     }
-  //   val repr = newParts mkString sysSep
-  //   repr
-  // }
-
-    // val parts =
-    //   KeyUtils.serialize(stroke).split(
-    //     Shortcut.SerializationDelimiter).toList
-    // val newParts: List[String] =
-    //   parts flatMap { el =>
-    //     el match {
-    //       case "pressed" => None
-    //       case "typed"   => None
-    //       case _         => Some(el)
-    //     }
-    //   }
-    // newParts mkString Shortcut.SerializationDelimiter
-  // }
+  override lazy val toString = {
+    val parts = Shortcut.separateInternalForm(internalForm)
+    import Key._
+    val newParts: List[String] = {
+      parts map { el =>
+        el match {
+          case InternalAlt    => sysAlt
+          case InternalCtrl   => sysCtrl
+          case InternalMeta   => sysMeta
+          case InternalShift  => sysShift
+          case InternalEscape => sysEscape
+          case _              => el
+        }
+      }
+    }.filterNot{ Set("typed", "pressed", "released") contains _ }
+    val repr = newParts mkString sysSep
+    repr
+  }
 }
 
 object Shortcut {
   
+  private val InternalFormDelimiter = " "
+
+  def separateInternalForm(internalForm: String): List[String] =
+    internalForm.split(InternalFormDelimiter).toList
+
   def fromInternalForm(internalForm: String): Option[Shortcut] =
     Option(KeyStroke getKeyStroke internalForm) match {
       case Some(stroke) => {
@@ -78,7 +72,6 @@ object Shortcut {
   def fromExternalForm(
     maskKeyExternalForms: List[String],
     nonMaskKeyExternalForms: List[String]): Option[Shortcut] = {
-      val InternalFormDelimiter = " "
       val maskKeyInternalForms = maskKeyExternalForms map {
         Key external2InternalForm _
       }
@@ -99,8 +92,11 @@ object Key {
   private val ExternalMenu = "menu"
   private val ExternalCommand = "command"
 
-  private val InternalMeta = "meta"
-  private val InternalCtrl = "ctrl"
+  val InternalAlt = "alt"
+  val InternalCtrl = "ctrl"
+  val InternalEscape = "ESCAPE"
+  val InternalMeta = "meta"
+  val InternalShift = "shift"
 
   def external2InternalForm(str: String): String = {
     str match {

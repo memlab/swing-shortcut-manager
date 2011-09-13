@@ -28,7 +28,7 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
           case opt @ Some(_) => opt
           case None => {
             Console.err.println(getClass().getName +
-                                "won't retrieve() unparseable: " + storedStr)
+                                " won't retrieve() unparseable: " + storedStr)
             None
           }
         }
