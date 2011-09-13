@@ -126,66 +126,47 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
   object ShortcutKeyAdapter extends KeyAdapter {
 
     private val tab = ShortcutTable.this
-    private val downKeys = new m.ListBuffer[Int]()
-    private val maskCodes = Set(KeyEvent.VK_ALT, KeyEvent.VK_CONTROL,
-                        KeyEvent.VK_SHIFT, KeyEvent.VK_META)
-    private val standaloneKeys = Set(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT)
 
-    private def downKeyPartition() =
-      downKeys.toList.partition { maskCodes contains _ }
-
-    private def visualize(): String = {
-      downKeys.toList.map { key =>
-        Shortcut(KeyStroke.getKeyStroke(key, 0)).toString
-      }
-    }.toString
-
-
-    private def isValidShortcut(codes: List[Int]) = {
-      val (maskKeys, nonMaskKeys) = downKeyPartition()
-      if (nonMaskKeys.length == 1) {
-        val atLeastOneNonShiftMask = {
-          val nonShifts = maskKeys.filterNot { _ == KeyEvent.VK_SHIFT }
-          nonShifts.length > 0
-        }
-        val standalone = standaloneKeys.contains(nonMaskKeys.head)
-        atLeastOneNonShiftMask || standalone
-      }
-      else false
-    }
+    private val standaloneKeyCodes =
+      Set(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT, KeyEvent.VK_UP,
+          KeyEvent.VK_DOWN)
+    private val maskKeyCodes =
+      Set(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_ALT,
+          KeyEvent.VK_META)
 
     override def keyPressed(e: KeyEvent) {
+      val modifiers = e.getModifiers
+      val code = e.getKeyCode
       val rs = tab.getSelectedRow()
-      if (rs >= 0) {
-        tab.getModel.getValueAt(rs, 1) match {
-          case Shortcut(stroke) => {
-            val code = e.getKeyCode
-            downKeys append code
-            if (isValidShortcut(downKeys.toList)) {
-              val (maskKeys, nonMaskKeys) = downKeyPartition()
-              val masks =
-                maskKeys map { keyCode: Int =>
-                  keyCode match {
-                    case KeyEvent.VK_ALT     => InputEvent.ALT_DOWN_MASK
-                    case KeyEvent.VK_CONTROL => InputEvent.CTRL_DOWN_MASK
-                    case KeyEvent.VK_META    => InputEvent.META_DOWN_MASK
-                    case KeyEvent.VK_SHIFT   => InputEvent.SHIFT_DOWN_MASK
-                  }
-                }
-              val modifier = masks.fold(0) { _ | _ }
-              val newStroke =
-                KeyStroke.getKeyStroke(nonMaskKeys.head, modifier)
-              val short = Shortcut(newStroke)
-              println("binding: " + short)
-              downKeys.clear()
+
+      val swapOpt: Option[ShortcutSwap] =
+        if (maskKeyCodes contains code) None
+        else if (rs >= 0) {
+          val newShortcut = Shortcut(KeyStroke.getKeyStroke(code, modifiers))
+          tab.getModel.getValueAt(rs, 1) match {
+            case oldShortcut: Shortcut => {
+              val swap = ShortcutSwap(oldShortcut, newShortcut)
+              if (modifiers == InputEvent.SHIFT_DOWN_MASK || modifiers == 0) {
+                if (standaloneKeyCodes contains code) Some(swap)
+                else None
+              }
+              else Some(swap)
             }
+            case _ => None
           }
-          case _ =>
         }
+        else None
+
+      swapOpt match {
+        case Some(ShortcutSwap(o, n)) => {
+          println("replacing " + o + " with " + n)
+        }
+        case None =>
       }
     }
 
-    override def keyReleased(e: KeyEvent): Unit = downKeys.clear()
+    private case class ShortcutSwap(oldShortcut: Shortcut,
+                                    newShortcut: Shortcut)
   }
 
   object ShortcutTableModel extends TableModel {
