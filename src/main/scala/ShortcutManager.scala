@@ -12,6 +12,7 @@ import javax.swing.{ AbstractAction, BorderFactory, KeyStroke, JOptionPane,
                      WindowConstants }
 import javax.swing.{ JButton, JComponent, JFrame,
                      JLabel, JPanel, JTable, JScrollPane, UIManager }
+import javax.swing.border.CompoundBorder
 import javax.swing.event.TableModelListener
 import javax.swing.table.{ DefaultTableCellRenderer, TableCellRenderer,
                            TableModel }
@@ -144,7 +145,7 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
 
     override def getRowCount = defaultXActions.length
     override def getColumnCount = headers.length
-    override def isCellEditable(rx: Int, cx: Int) = true
+    override def isCellEditable(rx: Int, cx: Int) = false
     override def getColumnName(cx: Int) = headers(cx)
     override def getColumnClass(cx: Int) = classOf[String]
     override def getValueAt(rx: Int, cx: Int) =
@@ -171,28 +172,22 @@ class ShortcutTable(defaultXActions: IndexedSeq[XAction],
 
     override def getTableCellRendererComponent(
       tab: JTable, value: AnyRef, sel: Boolean, foc: Boolean,
-      rx: Int, cx: Int) = {
+      rx: Int, cx: Int): ShortcutCellRenderer = {
         super.getTableCellRendererComponent(tab, value, sel, foc, rx, cx)
 
-        // if (foc)
-        //   setBorder(UIManager getBorder("Table.focusCellHighlightBorder"))
-        // else setBackground(tab getBackground)
-
         val (rs, cs) = (tab.getSelectedRow(), tab.getSelectedColumn())
-        val background =
-          if (rs == rx) {
-            if (cs != cx) {
-              tab setColumnSelectionInterval (1, 1)
-              tab setRowSelectionInterval (rs, rs)
-              tab getBackground()
-            }
-            else tab.getSelectionBackground()
-          }
-          else tab.getBackground()
-        setBackground(background)
+        val outerBorder =
+          if (rs == rx && cx != 1)
+            UIManager.getBorder("Table.focusCellHighlightBorder")
+          else BorderFactory.createEmptyBorder(1, 1, 1, 1)
+        val innerBorder =
+          BorderFactory.createEmptyBorder(0, leftRightPad, 0, leftRightPad)
+        this setBorder new CompoundBorder(outerBorder, innerBorder)
 
-        setBorder(
-          BorderFactory.createEmptyBorder(0, leftRightPad, 0, leftRightPad))
+        val background =
+          if (rs == rx && cx == 1) tab.getSelectionBackground()
+          else tab.getBackground()
+        this setBackground background
 
         this
     }
