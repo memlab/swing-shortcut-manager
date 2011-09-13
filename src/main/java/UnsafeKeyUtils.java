@@ -32,11 +32,11 @@ public class UnsafeKeyUtils {
         }
         if ((m &
              (InputEvent.BUTTON2_DOWN_MASK|InputEvent.BUTTON2_MASK)) != 0) {
-            s.append("button2 ");
+            s.append("alt ");
         }
         if ((m &
              (InputEvent.BUTTON3_DOWN_MASK|InputEvent.BUTTON3_MASK)) != 0) {
-            s.append("button3 ");
+            s.append("meta ");
         }
 
         switch (key.getKeyEventType()) {
