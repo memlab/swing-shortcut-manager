@@ -1,3 +1,3 @@
-# keyboard-manager #
+# swing-keyboard-manager #
 
-This is a generic key binding manager for Java Swing.
+This is a reusable keyboard shortcut manager for Java Swing.

@@ -1,4 +1,4 @@
-package edu.upenn.psych.memory.keyboardmanager
+package edu.upenn.psych.memory.shortcutmanager
 
 import javax.swing.KeyStroke
 

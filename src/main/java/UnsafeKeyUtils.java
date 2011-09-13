@@ -1,7 +1,7 @@
 //from Example Depot
 //http://www.exampledepot.com/egs/javax.swing/Key2Str.html
 
-package edu.upenn.psych.memory.keyboardmanager;
+package edu.upenn.psych.memory.shortcutmanager;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;

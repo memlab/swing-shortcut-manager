@@ -1,5 +1,5 @@
 //BASIC PROJECT INFO
-name := "keyboard-manager"
+name := "swing-shortcut-manager"
 
 organization := "edu.upenn.psych.memory"
 
@@ -14,10 +14,10 @@ javacOptions ++= Seq("-Xlint:unchecked")
 
 //ENTRY POINT
 mainClass in (Compile, packageBin) :=
-  Some("edu.upenn.psych.memory.keyboardmanager.Main")
+  Some("edu.upenn.psych.memory.shortcutmanager.Main")
 
 mainClass in (Compile, run) :=
-  Some("edu.upenn.psych.memory.keyboardmanager.Main")
+  Some("edu.upenn.psych.memory.shortcutmanager.Main")
 
 //JAVA DEPENDENCIES
 libraryDependencies ++= Seq (

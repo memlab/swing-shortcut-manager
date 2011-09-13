@@ -1,4 +1,4 @@
-package edu.upenn.psych.memory.keyboardmanager
+package edu.upenn.psych.memory.shortcutmanager
 
 import java.awt.{ Color, Dimension, Insets }
 import java.awt.event.{ ActionEvent, KeyAdapter, KeyEvent,

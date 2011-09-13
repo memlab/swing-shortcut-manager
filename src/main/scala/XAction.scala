@@ -1,4 +1,4 @@
-package edu.upenn.psych.memory.keyboardmanager
+package edu.upenn.psych.memory.shortcutmanager
 
 case class XAction(val className: String,
                    name: String,
