@@ -8,11 +8,13 @@ import java.util.EventObject
 
 import javax.swing.{ Box, BoxLayout }
 import javax.swing.{ AbstractAction, BorderFactory, KeyStroke, JOptionPane,
-                     ListSelectionModel, SwingUtilities, WindowConstants }
-import javax.swing.{ DefaultCellEditor, JButton, JComponent, JFrame, JLabel,
-                     JPanel, JTable, JScrollPane, JTextField, UIManager }
+                     ListSelectionModel, ScrollPaneConstants, SwingUtilities,
+                     WindowConstants }
+import javax.swing.{ JButton, JComponent, JFrame,
+                     JLabel, JPanel, JTable, JScrollPane, UIManager }
 import javax.swing.event.TableModelListener
-import javax.swing.table.{ TableCellRenderer, TableModel }
+import javax.swing.table.{ DefaultTableCellRenderer, TableCellRenderer,
+                           TableModel }
 import javax.swing.text.JTextComponent
 
 import scala.collection.{ mutable => m }
@@ -23,13 +25,12 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
 
   private val defaultXActions = new XActionParser(url).xactions
   val userdb = new UserDB(namespace, defaultXActions)
-  userdb persistDefaults true
-  // userdb persistDefaults false
+  userdb persistDefaults false
 
   this setSize(
     new Dimension(
-      ContentPane.getPreferredSize.getWidth.toInt,
-      ContentPane.getPreferredSize.getHeight.toInt))
+      800,
+      ContentPane.getPreferredSize.getWidth.toInt))
   this setDefaultCloseOperation WindowConstants.DO_NOTHING_ON_CLOSE
   this addWindowListener EscapeWindowListener
   this setTitle "Keyboard Shortcuts Manager"
@@ -43,9 +44,15 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
 
     object Scroller extends JScrollPane {
 
-      this setViewportView new ShortcutsTable(defaultXActions.toIndexedSeq,
+      this setViewportView new ShortcutTable(defaultXActions.toIndexedSeq,
                                               userdb)
 
+      this.setHorizontalScrollBarPolicy(
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+      )
+      this.setVerticalScrollBarPolicy(
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
+      )
       getHorizontalScrollBar setUnitIncrement 15
       getVerticalScrollBar setUnitIncrement 15
 
@@ -85,16 +92,15 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
   }
 }
 
-class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
-                     userdb: UserDB) extends RXTable {
+class ShortcutTable(defaultXActions: IndexedSeq[XAction],
+                     userdb: UserDB) extends JTable {
 
   val leftRightPad = 10
 
-  this setModel ShortcutsTableModel
+  this setModel ShortcutTableModel
   this setSelectionMode ListSelectionModel.SINGLE_SELECTION
   this setFillsViewportHeight true
-  this addKeyListener ShortcutsKeyAdapter
-  this setSelectAllForEdit true
+  this addKeyListener ShortcutKeyAdapter
 
   for (c <- 0 until getColumnCount) {
     val col = getColumnModel.getColumn(c)
@@ -113,14 +119,10 @@ class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
   header setReorderingAllowed false
   header setResizingAllowed true
 
-  override def getCellRenderer(rx: Int, cx: Int) = new ShortcutsCellRenderer
-  override def getDefaultRenderer(clazz: Class[_]) = new ShortcutsCellRenderer
-  override def getCellEditor(rx: Int, cx: Int) =
-    new ShortcutsCellEditor(getCellRenderer(rx, cx))
-  override def getDefaultEditor(clazz: Class[_]) =
-    new ShortcutsCellEditor(getDefaultRenderer(clazz))
+  override def getCellRenderer(rx: Int, cx: Int) = new ShortcutCellRenderer
+  override def getDefaultRenderer(clazz: Class[_]) = new ShortcutCellRenderer
 
-  object ShortcutsKeyAdapter extends KeyAdapter {
+  object ShortcutKeyAdapter extends KeyAdapter {
 
     val stack = new m.ListBuffer[KeyEvent]()
 
@@ -135,14 +137,14 @@ class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
     }
   }
 
-  object ShortcutsTableModel extends TableModel {
+  object ShortcutTableModel extends TableModel {
 
     val headers = List("Action", "Shortcut", "Default")
     val NoShortcutRepr = ""
 
     override def getRowCount = defaultXActions.length
     override def getColumnCount = headers.length
-    override def isCellEditable(rx: Int, cx: Int) = cx == 1
+    override def isCellEditable(rx: Int, cx: Int) = true
     override def getColumnName(cx: Int) = headers(cx)
     override def getColumnClass(cx: Int) = classOf[String]
     override def getValueAt(rx: Int, cx: Int) =
@@ -165,36 +167,29 @@ class ShortcutsTable(defaultXActions: IndexedSeq[XAction],
     override def removeTableModelListener(l: TableModelListener) = ()
   }
 
-  class ShortcutsCellEditor(rend: JTextField) extends DefaultCellEditor(rend) {
-
-    override def getTableCellEditorComponent(
-      tab: JTable, value: AnyRef, sel: Boolean, rx: Int, cx: Int) = {
-        val cmp = super.getTableCellEditorComponent(tab, value, sel, rx, cx)
-        cmp match {
-          case jt: JTextField => {
-            jt setText value.toString
-            jt setBorder BorderFactory.createEmptyBorder(0, leftRightPad,
-                                                         0, leftRightPad)
-          }
-          case _ =>
-        }
-        cmp
-    }
-  }
-
-  class ShortcutsCellRenderer extends JTextField with TableCellRenderer {
+  class ShortcutCellRenderer extends DefaultTableCellRenderer {
 
     override def getTableCellRendererComponent(
       tab: JTable, value: AnyRef, sel: Boolean, foc: Boolean,
       rx: Int, cx: Int) = {
-        setText(value.toString)
+        super.getTableCellRendererComponent(tab, value, sel, foc, rx, cx)
 
-        if (foc)
-          setBorder(UIManager getBorder("Table.focusCellHighlightBorder"))
-        else setBackground(tab getBackground)
+        // if (foc)
+        //   setBorder(UIManager getBorder("Table.focusCellHighlightBorder"))
+        // else setBackground(tab getBackground)
 
-        if (sel) setBackground(tab getSelectionBackground())
-        else setBackground(tab.getBackground())
+        val (rs, cs) = (tab.getSelectedRow(), tab.getSelectedColumn())
+        val background =
+          if (rs == rx) {
+            if (cs != cx) {
+              tab setColumnSelectionInterval (1, 1)
+              tab setRowSelectionInterval (rs, rs)
+              tab getBackground()
+            }
+            else tab.getSelectionBackground()
+          }
+          else tab.getBackground()
+        setBackground(background)
 
         setBorder(
           BorderFactory.createEmptyBorder(0, leftRightPad, 0, leftRightPad))
