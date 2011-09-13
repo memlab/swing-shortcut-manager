@@ -96,13 +96,17 @@ object Shortcut {
 
 object Key {
 
-  private val Meta = "meta"
+  private val ExternalMenu = "menu"
+  private val ExternalCommand = "command"
+
+  private val InternalMeta = "meta"
+  private val InternalCtrl = "ctrl"
 
   def external2InternalForm(str: String): String = {
     str match {
-      case "menu"     => if (Properties.isMac) Meta else "ctrl"
-      case "command"  => Meta
-      case _          => str
+      case ExternalMenu => if (Properties.isMac) InternalMeta else InternalCtrl
+      case ExternalCommand => InternalMeta
+      case _ => str
     }
   }
 }
