@@ -76,7 +76,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.SeekAction"
-          arg="behaviors.multiact.SeekAction.SeekAmount.FORWARD_SMALL"
+          enum="SeekAmount.FORWARD_SMALL"
           name="Forward Small Amount">
     <shortcut>
       <key keyname="RIGHT" />
@@ -84,7 +84,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.SeekAction"
-          arg="behaviors.multiact.SeekAction.SeekAmount.BACKWARD_SMALL"
+          enum="SeekAmount.BACKWARD_SMALL"
           name="Backward Small Amount">
     <shortcut>
       <key keyname="LEFT" />
@@ -92,7 +92,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.SeekAction"
-          arg="behaviors.multiact.SeekAction.SeekAmount.FORWARD_MEDIUM"
+          enum="SeekAmount.FORWARD_MEDIUM"
           name="Forward Medium Amount">
     <shortcut>
       <mask keyname="menu" />
@@ -101,7 +101,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.SeekAction"
-          arg="behaviors.multiact.SeekAction.SeekAmount.BACKWARD_MEDIUM"
+          enum="SeekAmount.BACKWARD_MEDIUM"
           name="Backward Medium Amount">
     <shortcut>
       <mask keyname="menu" />
@@ -110,7 +110,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.SeekAction"
-          arg="behaviors.multiact.SeekAction.SeekAmount.FORWARD_LARGE"
+          enum="SeekAmount.FORWARD_LARGE"
           name="Forward Large Amount">
     <shortcut>
       <mask keyname="menu" />
@@ -120,7 +120,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.SeekAction"
-          arg="behaviors.multiact.SeekAction.SeekAmount.BACKWARD_LARGE"
+          enum="SeekAmount.BACKWARD_LARGE"
           name="Backward Large Amount">
     <shortcut>
       <mask keyname="menu" />
@@ -130,7 +130,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.ToggleAnnotationsAction"
-          arg="behaviors.multiact.ToggleAnnotationsAction.Direction.FORWARD"
+          enum="Direction.FORWARD"
           name="Toggle Next Annotation">
     <shortcut>
       <mask keyname="shift" />
@@ -139,7 +139,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.ToggleAnnotationsAction"
-          arg="behaviors.multiact.ToggleAnnotationsAction.Direction.BACKWARD"
+          enum="Direction.BACKWARD"
           name="Toggle Previous Annotation">
     <shortcut>
       <mask keyname="shift" />
@@ -148,7 +148,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.Last200PlusMoveAction"
-          arg="behaviors.multiact.Last200PlusMoveAction.Direction.BACKWARD"
+          enum="Direction.BACKWARD"
           name="Backward Small Amount then Replay Last 200 ms">
     <shortcut>
       <mask keyname="alt" />
@@ -157,7 +157,7 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   </action>
 
   <action class="behaviors.multiact.Last200PlusMoveAction"
-          arg="behaviors.multiact.Last200PlusMoveAction.Direction.FORWARD"
+          enum="Direction.FORWARD"
           name="Forward Small Amount then Replay Last 200 ms">
     <shortcut>
       <key keyname="alt" />

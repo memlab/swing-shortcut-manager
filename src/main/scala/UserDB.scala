@@ -10,8 +10,8 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
 
   private val prefs = Preferences.userRoot.node(namespace)
   
-  private def store(xaction: XAction) {
-    val key = xaction.className
+  def store(xaction: XAction) {
+    val key = xaction.id
     val value = xaction.shortcut match {
       case Some(short) => short.internalForm
       case None    => NoShortcut
@@ -19,8 +19,8 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
     prefs put (key, value)
   }
 
-  private def retrieve(className: String): Option[Shortcut] = {
-    val key = className
+  def retrieve(id: String): Option[Shortcut] = {
+    val key = id
     Option(prefs get (key, null)) match {
       case Some(NoShortcut) | None => None
       case Some(storedStr)       => {
@@ -38,7 +38,7 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
 
   def persistDefaults(overwrite: Boolean) {
     defaultXActions.foreach { xact =>
-      retrieve(xact.className) match {
+      retrieve(xact.id) match {
         case Some(_) if overwrite == false =>
         case _       => store(xact)
       }
@@ -46,10 +46,9 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
   }
 
   def retrieveAll(): Map[String, Option[Shortcut]] = {
-    val classNames = defaultXActions map { _.className }
+    val ids = defaultXActions map { _.id }
     val pairs: List[(String, Option[Shortcut])] =
-      classNames map { name => name -> retrieve(name) }
+      ids map { id => id -> retrieve(id) }
     Map(pairs: _*)
   }
 }
-

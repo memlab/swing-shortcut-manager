@@ -15,7 +15,7 @@ class XActionParser(url: URL) {
   private val KeyNameAttr = "keyname"
   private val NameAttr = "name"
   private val TooltipAttr = "tooltip"
-  private val ArgAttr = "arg"
+  private val ArgAttr = "enum"
 
   private val KeyName  = "key"
   private val MaskName = "mask"

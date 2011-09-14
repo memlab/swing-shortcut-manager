@@ -76,7 +76,8 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
             JOptionPane.showConfirmDialog(ShortcutManager.this,
                                           "Reset all shortcuts to defaults?")
           if (res == JOptionPane.YES_OPTION) {
-            println("resetting shortcuts to defaults")
+            userdb persistDefaults true
+            ContentPane.this.repaint()
           }
         }
       })
@@ -122,16 +123,14 @@ class ShortcutTable(defaultXActions: Array[XAction],
 
   override def getCellRenderer(rx: Int, cx: Int) = new ShortcutCellRenderer
   override def getDefaultRenderer(clazz: Class[_]) = new ShortcutCellRenderer
-
-  def updateShortcut(o: Shortcut, n: Shortcut) = ()
+  override def getModel(): ShortcutTableModel.type = ShortcutTableModel
 
   object ShortcutKeyAdapter extends KeyAdapter {
 
     private val tab = ShortcutTable.this
 
     private val standaloneKeyCodes =
-      Set(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT, KeyEvent.VK_UP,
-          KeyEvent.VK_DOWN)
+      Set(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT)
     private val maskKeyCodes =
       Set(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_ALT,
           KeyEvent.VK_META)
@@ -140,42 +139,51 @@ class ShortcutTable(defaultXActions: Array[XAction],
       val modifiers = e.getModifiers
       val code = e.getKeyCode
       val rs = tab.getSelectedRow()
+   
+      if (maskKeyCodes.contains(code) == false) {
+        if (rs >= 0) {
+          val newShortcut: Shortcut =
+            Shortcut(KeyStroke.getKeyStroke(code, modifiers))
+          val xact: XAction = tab.getModel.xactionForRow(rs).copy(
+            shortcut = Some(newShortcut)
+          )
 
-      val swapOpt: Option[ShortcutSwap] =
-        if (maskKeyCodes contains code) None
-        else if (rs >= 0) {
-          val newShortcut = Shortcut(KeyStroke.getKeyStroke(code, modifiers))
+          def doSwap() = {
+            val shortOpt = xact.shortcut
+            val dupXActOpt = defaultXActions.find { _.shortcut == shortOpt }
+            dupXActOpt match {
+              case Some(dupXAct) => {
+                val msg = shortOpt.get + " is already taken by " + dupXAct.name
+                JOptionPane.showMessageDialog(
+                  tab, msg, "Error", JOptionPane.OK_OPTION
+                )
+              }
+              case None => userdb.store(xact)
+            }
+          }
+
           tab.getModel.getValueAt(rs, 1) match {
             case oldShortcut: Shortcut => {
-              val swap = ShortcutSwap(oldShortcut, newShortcut)
               if (modifiers == InputEvent.SHIFT_DOWN_MASK || modifiers == 0) {
-                if (standaloneKeyCodes contains code) Some(swap)
+                if (standaloneKeyCodes contains code) doSwap()
                 else None
               }
-              else Some(swap)
+              else doSwap()
             }
             case _ => None
           }
         }
-        else None
-
-      swapOpt match {
-        case Some(ShortcutSwap(o, n)) => {
-          println("replacing " + o + " with " + n)
-          tab.updateShortcut(o, n)
-        }
-        case None =>
       }
+      tab.repaint()
     }
-
-    private case class ShortcutSwap(oldShortcut: Shortcut,
-                                    newShortcut: Shortcut)
   }
 
   object ShortcutTableModel extends TableModel {
 
     val headers = List("Action", "Shortcut", "Default")
     val NoShortcutRepr = ""
+
+    def xactionForRow(rx: Int): XAction = defaultXActions(rx)
 
     override def getRowCount = defaultXActions.length
     override def getColumnCount = headers.length
@@ -187,12 +195,15 @@ class ShortcutTable(defaultXActions: Array[XAction],
           rx < 0 || cx < 0) null
       else {
         val defXAction: XAction = defaultXActions(rx)
-        val curXShortcutOpt: Option[Shortcut] =
-          userdb.retrieveAll().getOrElse(defXAction.className, None)
+        val key = defXAction.id
+        val map: Map[String, Option[Shortcut]] = userdb.retrieveAll()
+        val curXShortcutOpt: Option[Shortcut] = map.getOrElse(key, None)
         if (cx == 0) defXAction.name
-        else if (cx == 1) curXShortcutOpt match {
-          case Some(shortcut) => shortcut
-          case None => NoShortcutRepr
+        else if (cx == 1) {
+          curXShortcutOpt match {
+            case Some(shortcut) => shortcut
+            case None => NoShortcutRepr
+          }
         }
         else defXAction.shortcut.getOrElse(NoShortcutRepr)
       }
