@@ -232,6 +232,7 @@ class ShortcutTable(defaultXActions: Array[XAction],
           if (rs == rx && cx == 1) tab.getSelectionBackground()
           else tab.getBackground()
         this setBackground background
+        if (!(rs == rx && cx == 1)) this setForeground Color.BLACK
         this
     }
   }
