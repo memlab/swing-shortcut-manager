@@ -147,7 +147,6 @@ class ShortcutTable(defaultXActions: Array[XAction],
           val xact: XAction = tab.getModel.xactionForRow(rs).copy(
             shortcut = Some(newShortcut)
           )
-          println(xact)
 
           def doSwap() = {
             val shortOpt = xact.shortcut
@@ -163,16 +162,16 @@ class ShortcutTable(defaultXActions: Array[XAction],
               case None => userdb.store(xact)
             }
           }
-
+          import ShortcutTableModel.NoShortcutRepr
           tab.getModel.getValueAt(rs, 1) match {
-            case oldShortcut: Shortcut => {
+            case Shortcut(_) | NoShortcutRepr => {
               if (modifiers == InputEvent.SHIFT_DOWN_MASK || modifiers == 0) {
                 if (standaloneKeyCodes contains code) doSwap()
                 else None
               }
               else doSwap()
             }
-            case _ => None
+            case _ =>
           }
         }
       }
