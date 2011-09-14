@@ -7,15 +7,37 @@ import scala.util.Properties
 
 case class Shortcut(stroke: KeyStroke) {
 
-  private def ifMac(macRepr: String, winLinRepr: String) =
-    if (Properties.isMac) macRepr else winLinRepr
+  private def ifMac[A](macThing: A, winLinThing: A) =
+    if (Properties.isMac) macThing else winLinThing
+
+  val PCCtrl = "Ctrl"
+  val PCAlt = "Alt"
+  val PCShift = "Shift"
+
+  val MacCtrl = "^"
+  val MacOption = "⌥"
+  val MacShift = "⇧"
+  val MacCommand = "⌘"
 
   lazy val sysSep    = ifMac("", "+")
-  lazy val sysAlt    = ifMac("⌥", "Alt")
-  lazy val sysCtrl   = ifMac("^", "Ctrl")
-  lazy val sysMeta   = ifMac("⌘", "Meta")
-  lazy val sysShift  = ifMac("⇧", "Shift")
+  lazy val sysAlt    = ifMac(MacOption, PCAlt)
+  lazy val sysCtrl   = ifMac(MacCtrl, PCCtrl)
+  lazy val sysMeta   = ifMac(MacCommand, "Meta")
+  lazy val sysShift  = ifMac(MacShift, PCShift)
   lazy val sysEscape = ifMac("⎋", "Esc")
+
+  lazy val macOrder = List(MacCtrl, MacOption, MacShift, MacCommand)
+  lazy val pcOrder = List(PCShift, PCCtrl, PCAlt)
+
+  def sortKeys(a: String, b: String) = {
+    val order = ifMac(macOrder, pcOrder)
+    (order indexOf a, order indexOf b) match {
+      case (-1, -1) => true //arbitrary choice
+      case (_, -1) => true
+      case (-1, _) => false
+      case (i, j) => i < j
+    }
+  }
 
   lazy val internalForm: String =
     Option(UnsafeKeyUtils.getInternalFormOrNull(stroke)) match {
@@ -42,7 +64,8 @@ case class Shortcut(stroke: KeyStroke) {
           case _              => el
         }
       }
-    }.filterNot{ Set("typed", "pressed", "released") contains _ }
+    }.sortWith(sortKeys)
+     .filterNot{ Set("typed", "pressed", "released") contains _ }
      .map{ _.toLowerCase.capitalize }
 
     val repr = newParts mkString sysSep

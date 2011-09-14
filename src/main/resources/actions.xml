@@ -42,7 +42,8 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
   <action class="behaviors.singleact.PlayPauseAction"
           name="Play/Pause">
     <shortcut>
-      <key keyname="SPACE" />
+      <mask keyname="menu" />
+      <key keyname="P" />
     </shortcut>
   </action>
   <action class="behaviors.singleact.ReplayLast200MillisAction"
