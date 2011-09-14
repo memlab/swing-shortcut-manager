@@ -147,13 +147,15 @@ class ShortcutTable(defaultXActions: Array[XAction],
           val xact: XAction = tab.getModel.xactionForRow(rs).copy(
             shortcut = Some(newShortcut)
           )
+          println(xact)
 
           def doSwap() = {
             val shortOpt = xact.shortcut
-            val dupXActOpt = defaultXActions.find { _.shortcut == shortOpt }
-            dupXActOpt match {
+            val dupShortOpt =
+              userdb.retrieveAll().values.find { _ == shortOpt }
+            dupShortOpt match {
               case Some(dupXAct) => {
-                val msg = shortOpt.get + " is already taken by " + dupXAct.name
+                val msg = shortOpt.get + " is already taken. "
                 JOptionPane.showMessageDialog(
                   tab, msg, "Error", JOptionPane.OK_OPTION
                 )
