@@ -35,8 +35,19 @@ traceLevel := 5
 //PROGUARD
 seq(ProguardPlugin.proguardSettings :_*)
 
+makeInJarFilter <<= (makeInJarFilter) {
+  (makeInJarFilter) => {
+    (file) => file match {
+      case "icu4j-2.6.1.jar" => makeInJarFilter(file) +
+        ",!com/ibm/icu/impl/data/LocaleElements_zh__PINYIN.class"
+      case "xml-apis-1.3.02.jar" => makeInJarFilter(file) + ",!**"
+      case _ => makeInJarFilter(file)
+    }
+  }
+}
+
 proguardOptions ++= Seq (
-    "-dontshrink -dontoptimize -dontobfuscate -dontpreverify -dontnote " +
-    "-ignorewarnings",
-    keepAllScala
+  "-dontshrink -dontoptimize -dontobfuscate -dontpreverify -dontnote " +
+  "-ignorewarnings",
+  keepAllScala
 )
