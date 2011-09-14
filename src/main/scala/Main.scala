@@ -6,7 +6,13 @@ object Main {
     val namespace = "/" + getClass.getPackage.getName.replace(".", "/")
     val resourcePath = "/actions.xml"
     Option(Main.getClass.getResource(resourcePath)) match {
-      case Some(url) => new ShortcutManager(url, namespace).setVisible(true)
+      case Some(url) => {
+        val listener = new XActionListener() {
+          override def xActionUpdated(xaction: XAction) =
+            println("heard " + xaction)
+        }
+        new ShortcutManager(url, namespace, listener).setVisible(true)
+      }
       case None => Console.err println "no keyboard shortcuts file found"
     }
   }

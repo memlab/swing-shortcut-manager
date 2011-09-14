@@ -22,10 +22,15 @@ import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
 import scala.util.Properties
 
-class ShortcutManager(url: URL, namespace: String) extends JFrame {
+abstract class XActionListener() {
+  def xActionUpdated(action: XAction)
+}
+
+class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
+  extends JFrame {
 
   private val defaultXActions = new XActionParser(url).xactions
-  val userdb = new UserDB(namespace, defaultXActions)
+  val userdb = new UserDB(namespace, defaultXActions, listener)
   userdb persistDefaults false
 
   this setSize(
@@ -37,6 +42,17 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
   this setTitle "Keyboard Shortcuts Manager"
   this setContentPane ContentPane
 
+  for (id <- userdb.retrieveAll().keys) {
+    val defaultXActionOpt = defaultXActions.find{ _.id == id }
+    defaultXActionOpt match {
+      case Some(xAction) => {
+        val newXAction = xAction.copy(shortcut = userdb.retrieve(id))
+        listener xActionUpdated newXAction
+      }
+      case None =>
+    }
+  }
+
   object ContentPane extends JPanel {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS))
     add(Scroller)
@@ -46,7 +62,7 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
     object Scroller extends JScrollPane {
 
       this setViewportView new ShortcutTable(defaultXActions.toArray,
-                                              userdb)
+                                              userdb, listener)
 
       this.setHorizontalScrollBarPolicy(
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
@@ -94,8 +110,8 @@ class ShortcutManager(url: URL, namespace: String) extends JFrame {
   }
 }
 
-class ShortcutTable(defaultXActions: Array[XAction],
-                     userdb: UserDB) extends JTable {
+class ShortcutTable(defaultXActions: Array[XAction], userdb: UserDB,
+                    listener: XActionListener) extends JTable {
 
   val leftRightPad = 10
 

@@ -2,7 +2,9 @@ package edu.upenn.psych.memory.shortcutmanager
 
 import java.util.prefs.Preferences
 
-class UserDB(namespace: String, defaultXActions: List[XAction]) {
+class UserDB(namespace: String, defaultXActions: List[XAction],
+  listener: XActionListener) {
+
   require(namespace startsWith "/",
           "namespace " + namespace + " is not absolute")
 
@@ -16,6 +18,7 @@ class UserDB(namespace: String, defaultXActions: List[XAction]) {
       case Some(short) => short.internalForm
       case None    => NoShortcut
     }
+    listener xActionUpdated xaction
     prefs put (key, value)
   }
 
