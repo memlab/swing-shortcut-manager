@@ -1,36 +1,51 @@
 package edu.upenn.psych.memory.shortcutmanager
 
+import java.awt.event.KeyEvent
+
 import javax.swing.KeyStroke
-
-import scala.util.Properties
-
 
 case class Shortcut(stroke: KeyStroke) {
 
-  private def ifMac[A](macThing: A, winLinThing: A) =
-    if (Properties.isMac) macThing else winLinThing
+  import Shortcut.isMac
 
   val PCCtrl = "Ctrl"
   val PCAlt = "Alt"
   val PCShift = "Shift"
+  val PCMeta = "Meta"
 
   val MacCtrl = "^"
   val MacOption = "⌥"
   val MacShift = "⇧"
   val MacCommand = "⌘"
 
-  lazy val sysSep    = ifMac("", "+")
-  lazy val sysAlt    = ifMac(MacOption, PCAlt)
-  lazy val sysCtrl   = ifMac(MacCtrl, PCCtrl)
-  lazy val sysMeta   = ifMac(MacCommand, "Meta")
-  lazy val sysShift  = ifMac(MacShift, PCShift)
-  lazy val sysEscape = ifMac("⎋", "Esc")
+  val sysSep = if (isMac) "" else "+"
+
+  import KeyEvent._
+  val MacMap: Map[String, (String, String)] = Map (
+    "control" -> (PCCtrl, MacCtrl),
+    "alt" -> (PCAlt, MacOption),
+    "shift" -> (PCShift, MacShift),
+    "meta" -> (PCMeta, MacCommand),
+    "BACK_SPACE" -> ("BackSpace", "⌫"),
+    "DELETE" -> ("Del", "⌦"),
+    "ENTER" -> ("Enter", "↩"),
+    "ESCAPE" -> ("Esc", "⎋"),
+    "HOME" -> ("Home", "\u2196"),
+    "END" -> ("End", "\u2198"),
+    "PAGE_UP" -> ("PgUp", "PgUp"), //u8670
+    "PAGE_DOWN" -> ("PgDn", "PgDn"), //u8671
+    "LEFT" -> ("Left", "←"),
+    "RIGHT" -> ("Right", "→"),
+    "UP" -> ("Up", "↑"),
+    "DOWN" -> ("Down", "↓"),
+    "TAB" -> ("Tab", "Tab") //u8677
+  )
 
   lazy val macOrder = List(MacCtrl, MacOption, MacShift, MacCommand)
   lazy val pcOrder = List(PCShift, PCCtrl, PCAlt)
 
   def sortKeys(a: String, b: String) = {
-    val order = ifMac(macOrder, pcOrder)
+    val order = if (isMac) macOrder else pcOrder
     (order indexOf a, order indexOf b) match {
       case (-1, -1) => true //arbitrary choice
       case (_, -1) => true
@@ -53,16 +68,10 @@ case class Shortcut(stroke: KeyStroke) {
   override lazy val toString = {
     val parts = Shortcut.separateInternalForm(internalForm)
     import Key._
-    val newParts: List[String] = {
-      parts map { el =>
-        el match {
-          case InternalAlt    => sysAlt
-          case InternalCtrl   => sysCtrl
-          case InternalMeta   => sysMeta
-          case InternalShift  => sysShift
-          case InternalEscape => sysEscape
-          case _              => el
-        }
+    val newParts: List[String] = parts.map { s: String =>
+      MacMap.get(s) match {
+        case None => s
+        case Some(Pair(pc, mac)) => if (isMac) mac else pc
       }
     }.sortWith(sortKeys)
      .filterNot{ Set("typed", "pressed", "released") contains _ }
@@ -75,6 +84,7 @@ case class Shortcut(stroke: KeyStroke) {
 
 object Shortcut {
   
+  val isMac = util.Properties.isMac
   private val InternalFormDelimiter = " "
 
   def separateInternalForm(internalForm: String): List[String] =
@@ -114,6 +124,8 @@ object Shortcut {
 
 object Key {
 
+  import Shortcut.isMac
+
   private val ExternalMenu = "menu"
   private val ExternalCommand = "command"
 
@@ -125,7 +137,7 @@ object Key {
 
   def external2InternalForm(str: String): String = {
     str match {
-      case ExternalMenu => if (Properties.isMac) InternalMeta else InternalCtrl
+      case ExternalMenu => if (isMac) InternalMeta else InternalCtrl
       case ExternalCommand => InternalMeta
       case _ => str
     }
