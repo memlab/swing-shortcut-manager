@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import scala.util.Properties
 
 abstract class XActionListener() {
-  def xActionUpdated(action: XAction)
+  def xActionUpdated(action: XAction, oldShortcut: Option[Shortcut])
 }
 
 class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
@@ -42,12 +42,14 @@ class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
   this setTitle "Keyboard Shortcuts Manager"
   this setContentPane ContentPane
 
-  for (id <- userdb.retrieveAll().keys) {
+  val curShortMap = userdb.retrieveAll()
+  for (id <- curShortMap.keys) {
     val defaultXActionOpt = defaultXActions.find{ _.id == id }
     defaultXActionOpt match {
       case Some(xAction) => {
+        val shortOpt = curShortMap(id)
         val newXAction = xAction.copy(shortcut = userdb.retrieve(id))
-        listener xActionUpdated newXAction
+        listener xActionUpdated (newXAction, shortOpt)
       }
       case None =>
     }
