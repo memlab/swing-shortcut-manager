@@ -88,11 +88,11 @@ class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
     }
 
     object ResetButtonPanel extends JPanel {
-      val but = new JButton(new AbstractAction("reset to defaults") {
+      val but = new JButton(new AbstractAction("Restore Defaults") {
         override def actionPerformed(e: ActionEvent) {
           val res =
             JOptionPane.showConfirmDialog(ShortcutManager.this,
-                                          "Reset all shortcuts to defaults?")
+                                          "Restore all shortcuts to defaults?")
           if (res == JOptionPane.YES_OPTION) {
             userdb persistDefaults true
             ContentPane.this.repaint()
