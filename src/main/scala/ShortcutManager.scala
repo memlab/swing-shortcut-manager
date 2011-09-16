@@ -187,7 +187,8 @@ class ShortcutTable(defaultXActions: Array[XAction], userdb: UserDB,
         //what's currently in the table
         val rowXAct: XAction = tab.getModel.xactionForRow(rs)
 
-        if(code == KeyEvent.VK_BACK_SPACE && modifiers == 0) {
+        if((code == KeyEvent.VK_BACK_SPACE || code == KeyEvent.VK_DELETE) &&
+            modifiers == 0) {
           val newXAct = rowXAct.copy(shortcut = None)
           doSwap(newXAct)
         }
