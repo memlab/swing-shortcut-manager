@@ -24,21 +24,53 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
       <key keyname="D" />
     </shortcut>
   </action>
-  <action class="behaviors.singleact.ExitAction"
-          name="Exit">
-    <shortcut>
-      <mask keyname="menu" />
-      <key keyname="X" />
-    </shortcut>
-  </action>
-  <action class="behaviors.singleact.OpenAudioLocationAction"
+
+  <action class="behaviors.multiact.OpenAudioLocationAction"
+          enum="SelectionMode.FILES_AND_DIRECTORIES"
           name="Add Audio Files..."
-          tooltip="Select File or Folder">
+          tooltip="Select File or Folder"
+          os="Linux,Windows"
+          >
     <shortcut>
       <mask keyname="menu" />
       <key keyname="O" />
     </shortcut>
   </action>
+
+  <action class="behaviors.multiact.OpenAudioLocationAction"
+          enum="SelectionMode.FILES_ONLY"
+          name="Open Audio File..."
+          os="Mac OS X"
+          >
+    <shortcut>
+      <mask keyname="menu" />
+      <key keyname="O" />
+    </shortcut>
+  </action>
+
+  <action class="behaviors.multiact.OpenAudioLocationAction"
+          enum="SelectionMode.DIRECTORIES_ONLY"
+          name="Open Audio Folder..."
+          os="Mac OS X"
+          >
+    <shortcut>
+      <mask keyname="menu" />
+      <mask keyname="alt" />
+      <key keyname="O" />
+    </shortcut>
+  </action>
+
+  <action class="behaviors.singleact.OpenWordpoolAction"
+          name="Select Wordpool..."
+          tooltip="Select Text File Containing Words in Audio File"
+          >
+    <shortcut>
+      <mask keyname="menu" />
+      <mask keyname="shift" />
+      <key keyname="O" />
+    </shortcut>
+  </action>
+
   <action class="behaviors.singleact.PlayPauseAction"
           name="Play/Pause">
     <shortcut>
@@ -120,6 +152,16 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
     </shortcut>
   </action>
 
+  <action class="behaviors.singleact.ExitAction"
+          name="Exit"
+          os="Windows,Linux"
+          >
+    <shortcut>
+      <mask keyname="menu" />
+      <key keyname="X" />
+    </shortcut>
+  </action>
+
   <action class="behaviors.multiact.SeekAction"
           enum="SeekAmount.BACKWARD_LARGE"
           name="Backward Large Amount">
@@ -166,31 +208,30 @@ http://download.oracle.com/javase/6/docs/api/java/awt/event/KeyEvent.html
     </shortcut>
   </action>
 
+  <action class="behaviors.singleact.DeleteSelectedAnnotationAction"
+          name="Delete Selected Annotation on Waveform">
+    <shortcut>
+      <mask keyname="menu" />
+      <key keyname="DELETE" />
+    </shortcut>
+  </action>
+
   <!-- Actions without keyboard shortcuts -->
+  <action class="behaviors.singleact.PreferencesAction"
+          name="Preferences..." />
+
   <action class="behaviors.singleact.AboutAction"
           name="About" />
-
-  <action class="behaviors.singleact.ContinueAnnotatingAction"
-          name="Continue Editing" />
 
   <action class="behaviors.singleact.CheckUpdatesAction"
           name="Check For Updates" />
 
-  <action class="behaviors.singleact.DeleteAnnotationAction"
-          name="Delete Annotation" />
-
-  <action class="behaviors.singleact.OpenWordpoolAction"
-          name="Select Wordpool..."
-          tooltip="Select Text File Containing Words in Audio File" />
-
-  <action class="behaviors.singleact.PreferencesAction"
-          name="Preferences..." />
-
   <action class="behaviors.singleact.VisitTutorialSiteAction"
           name="Program Homapage" />
 
-  <action class="behaviors.singleact.EditKeyboardShortcutsAction"
-          name="Edit Keyboard Shortcuts" />
+  <action class="behaviors.singleact.EditShortcutsAction"
+          name="Edit Keyboard Shortcuts..." />
 
-
+  <action class="behaviors.singleact.TipsMessageAction"
+          name="View Program Tips..." />
 </actions>
