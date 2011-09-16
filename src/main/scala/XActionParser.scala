@@ -75,10 +75,7 @@ class XActionParser(url: URL) {
       }
 
     osOpt match {
-      case Some(goodOSes) if goodOSes.contains(Properties.osName) == false => {
-        println("discarding: " + name + " on this os")
-        None
-      }
+      case Some(goodOSes) if goodOSes.contains(Properties.osName) == false => None
       case _ => {
         val baseXAction = XAction(clazz, argOpt, name, tooltipOpt, None)
 
