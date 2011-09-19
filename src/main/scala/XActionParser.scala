@@ -24,6 +24,7 @@ import java.net.URL
 
 import scala.collection.{ mutable => m }
 import scala.collection.JavaConverters._
+import scala.util.Properties
 
 import org.jdom.{ Attribute, Element }
 import org.jdom.input.SAXBuilder
@@ -36,9 +37,15 @@ class XActionParser(url: URL) {
   private val NameAttr = "name"
   private val TooltipAttr = "tooltip"
   private val ArgAttr = "enum"
+  private val OsAttr = "os"
 
   private val KeyName  = "key"
   private val MaskName = "mask"
+
+  sealed trait OS
+  case object Windows extends OS
+  case object Mac extends OS
+  case object Linux extends OS
 
   lazy val xactions: List[XAction] = {
     val acts = parseXActions()
@@ -81,13 +88,24 @@ class XActionParser(url: URL) {
     val clazz = act getAttributeValue ClassAttr
     val tooltipOpt = Option(act getAttributeValue TooltipAttr)
     val argOpt = Option(act getAttributeValue ArgAttr)
-    val baseXAction = XAction(clazz, argOpt, name, tooltipOpt, None)
-
-    if (act.getChildren.size == 0) Some(baseXAction)
-    else {
-      parseShortcut(act.getChildren.get(0).asInstanceOf[Element]) match {
-        case opt @ Some(_) => Some(baseXAction.copy(shortcut = opt))
+    val osOpt: Option[List[String]] =
+      Option(act getAttributeValue OsAttr) match {
+        case Some(str) => Some(str.split(",").toList)
         case None => None
+      }
+
+    osOpt match {
+      case Some(goodOSes) if goodOSes.contains(Properties.osName) == false => None
+      case _ => {
+        val baseXAction = XAction(clazz, argOpt, name, tooltipOpt, None)
+
+        if (act.getChildren.size == 0) Some(baseXAction)
+        else {
+          parseShortcut(act.getChildren.get(0).asInstanceOf[Element]) match {
+            case opt @ Some(_) => Some(baseXAction.copy(shortcut = opt))
+            case None => None
+          }
+        }
       }
     }
   }

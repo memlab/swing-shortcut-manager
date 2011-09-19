@@ -28,8 +28,9 @@ object Main {
     Option(Main.getClass.getResource(resourcePath)) match {
       case Some(url) => {
         val listener = new XActionListener() {
-          override def xActionUpdated(xaction: XAction) =
-            println("heard " + xaction)
+          override def xActionUpdated(xaction: XAction,
+                                      old: Option[Shortcut]) =
+            println("heard " + xaction + " formerly " + old)
         }
         new ShortcutManager(url, namespace, listener).setVisible(true)
       }

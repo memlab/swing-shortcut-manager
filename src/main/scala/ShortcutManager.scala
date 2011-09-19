@@ -43,7 +43,7 @@ import scala.collection.JavaConverters._
 import scala.util.Properties
 
 abstract class XActionListener() {
-  def xActionUpdated(action: XAction)
+  def xActionUpdated(action: XAction, oldShortcut: Option[Shortcut])
 }
 
 class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
@@ -62,12 +62,14 @@ class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
   this setTitle "Keyboard Shortcuts Manager"
   this setContentPane ContentPane
 
-  for (id <- userdb.retrieveAll().keys) {
+  val curShortMap = userdb.retrieveAll()
+  for (id <- curShortMap.keys) {
     val defaultXActionOpt = defaultXActions.find{ _.id == id }
     defaultXActionOpt match {
       case Some(xAction) => {
+        val shortOpt = curShortMap(id)
         val newXAction = xAction.copy(shortcut = userdb.retrieve(id))
-        listener xActionUpdated newXAction
+        listener xActionUpdated (newXAction, shortOpt)
       }
       case None =>
     }
@@ -106,11 +108,11 @@ class ShortcutManager(url: URL, namespace: String, listener: XActionListener)
     }
 
     object ResetButtonPanel extends JPanel {
-      val but = new JButton(new AbstractAction("reset to defaults") {
+      val but = new JButton(new AbstractAction("Restore Defaults") {
         override def actionPerformed(e: ActionEvent) {
           val res =
             JOptionPane.showConfirmDialog(ShortcutManager.this,
-                                          "Reset all shortcuts to defaults?")
+                                          "Restore all shortcuts to defaults?")
           if (res == JOptionPane.YES_OPTION) {
             userdb persistDefaults true
             ContentPane.this.repaint()
@@ -175,43 +177,55 @@ class ShortcutTable(defaultXActions: Array[XAction], userdb: UserDB,
       val modifiers = e.getModifiers
       val code = e.getKeyCode
       val rs = tab.getSelectedRow()
-   
-      if (maskKeyCodes.contains(code) == false) {
-        if (rs >= 0) {
-          val newShortcut: Shortcut =
-            Shortcut(KeyStroke.getKeyStroke(code, modifiers))
-          val xact: XAction = tab.getModel.xactionForRow(rs).copy(
-            shortcut = Some(newShortcut)
-          )
 
-          def doSwap() = {
-            val shortOpt = xact.shortcut
-            val dupShortOpt =
-              userdb.retrieveAll().values.find { _ == shortOpt }
-            dupShortOpt match {
-              case Some(dupXAct) => {
-                val msg = shortOpt.get + " is already taken. "
-                JOptionPane.showMessageDialog(
-                  tab, msg, "Error", JOptionPane.OK_OPTION
-                )
+      if (rs >= 0) {
+        def doSwap(toSwapIn: XAction) = {
+          val shortOpt: Option[Shortcut] = toSwapIn.shortcut
+          val dupShortOpt: Option[Shortcut] =
+            userdb.retrieveAll().values.flatten.find { short1 =>
+              shortOpt match {
+                case Some(short2) => short1 == short2
+                case None => false
               }
-              case None => userdb.store(xact)
             }
-          }
-          import ShortcutTableModel.NoShortcutRepr
-          tab.getModel.getValueAt(rs, 1) match {
-            case Shortcut(_) | NoShortcutRepr => {
-              if (modifiers == InputEvent.SHIFT_DOWN_MASK || modifiers == 0) {
-                if (standaloneKeyCodes contains code) doSwap()
-                else None
-              }
-              else doSwap()
+          dupShortOpt match {
+            case Some(short: Shortcut) => {
+              val msg = short + " is already taken. "
+              JOptionPane.showMessageDialog(
+                tab, msg, "Error", JOptionPane.OK_OPTION
+              )
             }
-            case _ =>
+            case None => {
+              userdb.store(toSwapIn)
+              tab.repaint()
+            }
           }
         }
+
+        //this is what the user entered
+        val enteredShortcut: Shortcut =
+          Shortcut(KeyStroke.getKeyStroke(code, modifiers))
+
+        //what's currently in the table
+        val rowXAct: XAction = tab.getModel.xactionForRow(rs)
+
+        if((code == KeyEvent.VK_BACK_SPACE || code == KeyEvent.VK_DELETE) &&
+            modifiers == 0) {
+          val newXAct = rowXAct.copy(shortcut = None)
+          doSwap(newXAct)
+        }
+        else if (maskKeyCodes contains code) {
+          //this is just the press of a mask
+        }
+        else {
+          val newXAct = rowXAct.copy(shortcut = Some(enteredShortcut))
+          if (modifiers == InputEvent.SHIFT_DOWN_MASK || modifiers == 0) {
+            if (standaloneKeyCodes contains code) doSwap(newXAct)
+            else None
+          }
+          else doSwap(newXAct)
+        }
       }
-      tab.repaint()
     }
   }
 

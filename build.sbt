@@ -3,7 +3,7 @@ name := "swing-shortcut-manager"
 
 organization := "edu.upenn.psych.memory"
 
-version := "prototype"
+version := "0.2.1"
 
 //SCALA VERSIONS AND OPTIONS
 scalaVersion := "2.9.1"

@@ -34,11 +34,12 @@ class UserDB(namespace: String, defaultXActions: List[XAction],
   
   def store(xaction: XAction) {
     val key = xaction.id
+    val oldShortcut = retrieveAll()(key)
     val value = xaction.shortcut match {
       case Some(short) => short.internalForm
       case None    => NoShortcut
     }
-    listener xActionUpdated xaction
+    listener xActionUpdated (xaction, oldShortcut)
     prefs put (key, value)
   }
 
