@@ -1,7 +1,7 @@
 /* basic project info */
 name := "swing-shortcut-manager"
 
-organization := "edu.upenn.psych.memory"
+organization := "com.yuvimasory"
 
 version := "0.2.1"
 
