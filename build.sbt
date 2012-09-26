@@ -3,7 +3,7 @@ name := "swing-shortcut-manager"
 
 organization := "com.yuvimasory"
 
-version := "0.2.1"
+version := "1.0.0"
 
 /* scala versions and options */
 scalaVersion := "2.9.2"
