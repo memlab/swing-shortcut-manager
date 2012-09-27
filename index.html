@@ -51,37 +51,35 @@
       <h2>Windows</h2>
       <p> <img src="win-screenshot.png" alt="screenshot" width="700"/> </p>
 
-      <h2>Try it</h2>
-      Download the <a href="https://github.com/downloads/memlab/swing-shortcut-manager/swing-shortcut-manager-0.3.0-standalone.jar">standalone jar</a> and then run it. (On some configurations you can just double click the jar, on others run <tt>java -jar swing-shortcut-manager-0.3.0-standalone.jar</tt>).
-
       <h2>Integrating into your application</h2>
-      Swing Keyboard Manager is designed to be easily integrated into your application. More documentation will come in the future, for now check out how Penn TotalRecall does it, using an <a href="https://github.com/memlab/Penn-TotalRecall/blob/master/resources/actions.xml"><tt>actions.xml</tt></a> file, a simple <a href="https://github.com/memlab/Penn-TotalRecall/blob/master/src/components/ShortcutFrame.java"><tt>JFrame</tt></a> and an <a href="https://github.com/memlab/Penn-TotalRecall/blob/master/src/control/XActionManager.java"><tt>XActionListener</tt></a>.
+      Swing Keyboard Manager is designed to be easily integrated into your application. Check out how Penn TotalRecall does it, using an <a href="https://github.com/memlab/Penn-TotalRecall/blob/master/resources/actions.xml"><tt>actions.xml</tt></a> file, a simple <a href="https://github.com/memlab/Penn-TotalRecall/blob/master/src/components/ShortcutFrame.java"><tt>JFrame</tt></a> and an <a href="https://github.com/memlab/Penn-TotalRecall/blob/master/src/control/XActionManager.java"><tt>XActionListener</tt></a>.
 
       <h2>Install</h2>
+Swing Keyboard Manager is available on <a href="http://central.maven.org/maven2/com/yuvimasory/">Maven Central</a>.
+
       <h3>Maven</h3>
-      <pre>
-        &lt;dependency&gt;
-        &lt;groupId&gt;edu.upenn.psych.memory&lt;/groupId&gt;
-        &lt;artifactId&gt;swing-keyboard-manager&lt;/artifactId&gt;
-        &lt;version&gt;0.3.0&lt;/version&gt;
-        &lt;/dependency&gt;
-      </pre>
+<pre>
+&lt;dependency&gt;
+&lt;groupId&gt;com.yuvimasory&lt;/groupId&gt;
+&lt;artifactId&gt;swing-keyboard-manager_2.9.2&lt;/artifactId&gt;
+&lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
 
       <h3>Ant</h3>
-      <pre>
-        &lt;dependency org=&quot;edu.upenn.psych.memory&quot; name=&quot;swing-keyboard-manager&quot; rev=&quot;0.3.0&quot;/&gt;
-      </pre>
+<pre>
+&lt;dependency org=&quot;com.yuvimasory&quot; name=&quot;swing-keyboard-manager_2.9.2&quot; rev=&quot;1.0.0&quot;/&gt;
+</pre>
 
       <h3>SBT</h3>
-      <pre>
-        libraryDependencies ++= Seq (
-        //other dependencies
-        "edu.upenn.psych.memory" % "swing-shortcut-manager" %% "0.3.0"
-        )
-      </pre>
+<pre>
+libraryDependencies += "com.yuvimasory" %% "swing-shortcut-manager" %% "1.0.0"
+</pre>
 
-      <h3>Manual</h3>
-      Add a jar marked "standalone" from the <a href="http://github.com/ymasory/swing-keyboard-manager/downloads">downloads page</a>. It packages all dependencies for you.
+      <h3>Using from Java & Scala</h3>
+      You may be wondering what the funny "_2.9.2" is on the Maven group ID.
+      That's just the version of Scala used to compile the project.
+      You can use the Swing Keyboard Manager from Java (version 5 or higher) or from Scala (versions 2.8.0 through 2.9.2).
 
       <h2>Source Code</h2>
       <p>
