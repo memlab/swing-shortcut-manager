@@ -2,5 +2,4 @@
 
 This is a reusable keyboard shortcut manager for Java Swing.
 
-# Projects using swing-keyboard-manager #
-- [Penn TotalRecall](http://memory.psych.upenn.edu/TotalRecall)
+Please see the [homepage](http://memlab.github.com/swing-shortcut-manager/) for documentation.
