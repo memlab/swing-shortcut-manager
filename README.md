@@ -1,4 +1,4 @@
-# swing-keyboard-manager #
+# swing-keyboard-manager [![Build Status](http://ci.yuvimasory.com/job/swing-shortcut-manager/badge/icon)](http://ci.yuvimasory.com/job/swing-shortcut-manager/) #
 
 This is a reusable keyboard shortcut manager for Java Swing.
 
